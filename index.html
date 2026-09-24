@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Wikiホップ</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --content-width: 440px;
+
+        --md-sys-color-surface: #ffffff;
+        --md-sys-color-surface-container: #f5f5f6;
+        --md-sys-color-surface-container-high: #ececed;
+        --md-sys-color-on-surface: #141416;
+        --md-sys-color-on-surface-variant: #6b6b73;
+        --md-sys-color-outline: #c8c8cf;
+        --md-sys-color-primary: #141416;
+        --md-sys-color-on-primary: #ffffff;
+        --md-sys-color-secondary-container: #e2e2e5;
+        --md-sys-color-on-secondary-container: #141416;
+        --md-sys-color-error: #b00020;
+        --md-sys-color-on-error: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.06);
+
+        --md-shape-corner-small: 8px;
+        --md-shape-corner-medium: 16px;
+        --md-shape-corner-large: 28px;
+        --md-shape-corner-full: 9999px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background-color 0.25s ease,
+          color 0.25s ease,
+          border-color 0.25s ease;
+      }
+
+      html,
+      body {
+        overscroll-behavior: none;
+        touch-action: manipulation;
+      }
+
+      body {
+        background-color: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
+        font-family: "Roboto", "Noto Sans JP", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 32px 16px;
+        padding-top: calc(32px + env(safe-area-inset-top));
+        padding-bottom: calc(32px + env(safe-area-inset-bottom));
+      }
+
+      .app-container {
+        background-color: var(--md-sys-color-surface-container);
+        border-radius: var(--md-shape-corner-large);
+        padding: 32px 24px;
+        max-width: 1200px;
+        width: 100%;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .screen {
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        animation: fadeIn 0.3s ease;
+      }
+      .screen.active {
+        display: flex;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      h1, h2 {
+        font-weight: 700;
+        color: var(--md-sys-color-on-surface);
+        text-align: center;
+        letter-spacing: -0.5px;
+      }
+      h1 { font-size: 28px; margin-bottom: 8px; }
+      h2 { font-size: 20px; }
+
+      .subtitle {
+        text-align: center;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .btn {
+        height: 48px;
+        padding: 0 20px;
+        border-radius: var(--md-shape-corner-full);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.1px;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        gap: 8px;
+        width: 100%;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background-color: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+      }
+      .btn-primary:hover {
+        box-shadow: 0 2px 6px var(--shadow-color);
+        filter: brightness(0.95);
+      }
+
+      .btn-secondary {
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-secondary-container);
+      }
+      .btn-secondary:hover {
+        filter: brightness(0.96);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--md-sys-color-on-surface);
+        border: 2px solid var(--md-sys-color-outline);
+      }
+      
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .list-container {
+        background-color: var(--md-sys-color-surface-container-high);
+        border-radius: var(--md-shape-corner-medium);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 250px;
+        overflow-y: auto;
+      }
+
+      .list-item {
+        background-color: var(--md-sys-color-surface);
+        padding: 12px;
+        border-radius: var(--md-shape-corner-small);
+        border: 1px solid var(--md-sys-color-outline);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .list-item-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--md-sys-color-on-surface-variant);
+        font-weight: 500;
+      }
+
+      .list-item-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--md-sys-color-on-surface);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .empty-text {
+        text-align: center;
+        color: var(--md-sys-color-on-surface-variant);
+        font-size: 13px;
+        padding: 20px 0;
+      }
+
+      .game-header {
+        background-color: var(--md-sys-color-surface);
+        padding: 16px;
+        border-radius: var(--md-shape-corner-medium);
+        border: 1px solid var(--md-sys-color-outline);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+
+      .target-info {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      .clicks-badge {
+        display: inline-block;
+        background-color: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+        padding: 4px 12px;
+        border-radius: var(--md-shape-corner-full);
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+
+      .wiki-container {
+        background-color: var(--md-sys-color-surface);
+        border-radius: var(--md-shape-corner-medium);
+        border: 1px solid var(--md-sys-color-outline);
+        padding: 24px;
+        height: 70vh;
+        overflow-y: auto;
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--md-sys-color-on-surface);
+      }
+
+      /* Clean up Wikipedia HTML */
+      .wiki-container .infobox, 
+      .wiki-container .navbox,
+      .wiki-container .mw-empty-elt,
+      .wiki-container .reference,
+      .wiki-container .reflist,
+      .wiki-container .mw-editsection,
+      .wiki-container .toc,
+      .wiki-container .noprint {
+        display: none !important;
+      }
+
+      .wiki-container h1, .wiki-container h2, .wiki-container h3 {
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        border-bottom: 1px solid var(--md-sys-color-outline);
+        padding-bottom: 4px;
+      }
+
+      .wiki-container a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+      }
+      .wiki-container a.disabled {
+        color: var(--md-sys-color-on-surface-variant) !important;
+        pointer-events: none;
+        border-bottom: none;
+        text-decoration: line-through;
+      }
+
+      .result-box {
+        background-color: var(--md-sys-color-surface);
+        padding: 32px 16px;
+        border-radius: var(--md-shape-corner-medium);
+        border: 1px solid var(--md-sys-color-outline);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .result-clicks {
+        font-size: 48px;
+        font-weight: 900;
+        color: var(--md-sys-color-primary);
+        line-height: 1;
+      }
+
+      .loading-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(245, 245, 246, 0.9);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--md-shape-corner-large);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .loading-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--md-sys-color-outline);
+        border-top-color: var(--md-sys-color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      footer {
+        margin-top: 24px;
+        font-size: 12px;
+        color: var(--md-sys-color-on-surface-variant);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      
+      <!-- Loading Overlay -->
+      <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);">通信中...</p>
+      </div>
+
+      <!-- Start Screen -->
+      <div id="screen-start" class="screen active">
+        <h1></h1>
+        <p class="subtitle"></p>
+        
+        <div id="today-daily-container" style="background-color: var(--md-sys-color-surface); border-radius: var(--md-shape-corner-medium); padding: 16px; border: 2px solid var(--md-sys-color-primary); text-align: center; margin-bottom: 8px;">
+          <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">今日のデイリー記事</div>
+          <div id="today-daily-article-display" style="font-size: 24px; font-weight: 900; color: var(--md-sys-color-on-surface); margin-top: 4px;">-</div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-daily-1">
+          デイリー (タイツ ➡️ 今日の記事)
+        </button>
+        <button class="btn btn-primary" id="btn-daily-2">
+          デイリー (今日の記事 ➡️ タイツ)
+        </button>
+        <button class="btn btn-secondary" id="btn-random">
+          エンドレス (ランダム出題)
+        </button>
+
+        <div style="height: 16px;"></div>
+        
+        <h2 style="font-size: 16px; text-align: left;">過去のデイリー問題</h2>
+        <div class="list-container" id="past-daily-list">
+          <div class="empty-text">読み込み中...</div>
+        </div>
+
+        <h2 style="font-size: 16px; text-align: left; margin-top: 8px;">あなたのプレイ履歴</h2>
+        <div class="list-container" id="local-history-list">
+          <div class="empty-text">まだ履歴がありません</div>
+        </div>
+      </div>
+
+      <!-- Game Screen -->
+      <div id="screen-game" class="screen">
+        <div class="game-header">
+          <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">現在地</div>
+          <div id="current-article-title" style="font-size: 20px; font-weight: 900;">-</div>
+          
+          <div style="margin: 8px 0; border-top: 1px dashed var(--md-sys-color-outline);"></div>
+          
+          <div class="target-info">
+            🏁 ゴール: <span id="target-article-title"></span>
+          </div>
+          <div>
+            <span class="clicks-badge">クリック数: <span id="click-count">0</span></span>
+          </div>
+        </div>
+
+        <div class="wiki-container" id="wiki-content">
+          <!-- Wikipedia HTML injected here -->
+        </div>
+
+        <button class="btn btn-outline" id="btn-retire">
+          リタイア (トップに戻る)
+        </button>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="screen-result" class="screen">
+        <div class="result-box">
+          <h1 style="margin: 0; font-size: 32px;">GOAL!🎉</h1>
+          <p class="subtitle" id="result-mode-text">デイリーモードクリア！</p>
+          
+          <div>
+            <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">クリア手番</div>
+            <div class="result-clicks" id="result-clicks-display">0</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-share">
+          <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X (Twitter) でシェア
+        </button>
+        <button class="btn btn-secondary" id="btn-result-home">
+          トップに戻る
+        </button>
+      </div>
+
+    </div>
+    
+    <footer>
+      Wikiホップ - UI System Match
+    </footer>
+
+    <script>
+      const API_BASE = "https://ja.wikipedia.org/w/api.php";
+      const CONST_TIGHTS = "タイツ";
+      
+      let state = {
+        mode: "", // 'daily1', 'daily2', 'random', 'past'
+        startArticle: "",
+        targetArticle: "",
+        currentArticle: "",
+        clicks: 0,
+        dailyData: null // { article }
+      };
+
+      const UI = {
+        screens: {
+          start: document.getElementById('screen-start'),
+          game: document.getElementById('screen-game'),
+          result: document.getElementById('screen-result')
+        },
+        loading: document.getElementById('loading'),
+        lists: {
+          pastDaily: document.getElementById('past-daily-list'),
+          localHistory: document.getElementById('local-history-list')
+        },
+        start: {
+          todayDailyArticle: document.getElementById('today-daily-article-display'),
+          btnDaily1: document.getElementById('btn-daily-1'),
+          btnDaily2: document.getElementById('btn-daily-2')
+        },
+        game: {
+          currentTitle: document.getElementById('current-article-title'),
+          targetTitle: document.getElementById('target-article-title'),
+          clickCount: document.getElementById('click-count'),
+          content: document.getElementById('wiki-content')
+        },
+        result: {
+          modeText: document.getElementById('result-mode-text'),
+          clicksDisplay: document.getElementById('result-clicks-display')
+        }
+      };
+
+      function showScreen(screenName) {
+        Object.values(UI.screens).forEach(el => el.classList.remove('active'));
+        UI.screens[screenName].classList.add('active');
+      }
+
+      function showLoading(show) {
+        if(show) UI.loading.classList.add('active');
+        else UI.loading.classList.remove('active');
+      }
+
+      async function fetchWikiRandom() {
+        const url = `${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=2&format=json&origin=*`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.query.random.map(r => r.title);
+      }
+
+      async function loadDailyJson() {
+        try {
+          const res = await fetch('./daily_history.json');
+          if(!res.ok) throw new Error("File not found");
+          const history = await res.json();
+          
+          if(history && history.length > 0) {
+            state.dailyData = history[0]; // Latest is today's
+            updateTodayDailyUI(state.dailyData.article);
+            renderPastDailyList(history.slice(1)); // Rest are past
+          } else {
+            throw new Error("Empty array");
+          }
+        } catch(e) {
+          console.warn("Could not load daily_history.json. Using fallback.");
+          // Fallback if file doesn't exist yet (e.g. before Action runs)
+          UI.lists.pastDaily.innerHTML = '<div class="empty-text">過去のデータがありません</div>';
+          
+          // Generate a deterministic fallback based on today's date
+          const dateStr = new Date().toLocaleDateString('ja-JP');
+          const fallbackPool = ["日本", "宇宙", "徳川家康", "インターネット", "寿司", "富士山"];
+          const seed = dateStr.length; // Simple mock seed
+          state.dailyData = {
+             article: fallbackPool[seed % fallbackPool.length]
+          };
+          updateTodayDailyUI(state.dailyData.article);
+        }
+      }
+
+      function updateTodayDailyUI(articleName) {
+        UI.start.todayDailyArticle.textContent = articleName;
+        UI.start.btnDaily1.innerHTML = `デイリー (タイツ ➡️ ${articleName})`;
+        UI.start.btnDaily2.innerHTML = `デイリー (${articleName} ➡️ タイツ)`;
+      }
+
+      function renderPastDailyList(pastList) {
+        if(pastList.length === 0) {
+          UI.lists.pastDaily.innerHTML = '<div class="empty-text">過去のデータがありません</div>';
+          return;
+        }
+        
+        UI.lists.pastDaily.innerHTML = '';
+        pastList.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <div class="list-item-header">
+              <span>${item.date}</span>
+            </div>
+            <div class="list-item-title">
+              <span style="font-size: 16px;">${item.article}</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${CONST_TIGHTS}', '${item.article}')">
+                タイツ ➡️ ${item.article}
+              </button>
+              <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${item.article}', '${CONST_TIGHTS}')">
+                ${item.article} ➡️ タイツ
+              </button>
+            </div>
+          `;
+          UI.lists.pastDaily.appendChild(div);
+        });
+      }
+
+      function saveToLocalHistory() {
+        let history = JSON.parse(localStorage.getItem('wiki_racing_history') || '[]');
+        history.unshift({
+          date: new Date().toLocaleString('ja-JP'),
+          start: state.startArticle,
+          target: state.targetArticle,
+          clicks: state.clicks,
+          mode: state.mode
+        });
+        if(history.length > 20) history = history.slice(0, 20);
+        localStorage.setItem('wiki_racing_history', JSON.stringify(history));
+        renderLocalHistory();
+      }
+
+      function renderLocalHistory() {
+        const history = JSON.parse(localStorage.getItem('wiki_racing_history') || '[]');
+        if(history.length === 0) {
+          UI.lists.localHistory.innerHTML = '<div class="empty-text">まだ履歴がありません</div>';
+          return;
+        }
+        
+        UI.lists.localHistory.innerHTML = '';
+        history.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <div class="list-item-header">
+              <span>${item.date}</span>
+              <span style="color: var(--md-sys-color-primary); font-weight:700;">${item.clicks}手クリア</span>
+            </div>
+            <div class="list-item-title">
+              ${item.start} ➡️ ${item.target}
+            </div>
+          `;
+          UI.lists.localHistory.appendChild(div);
+        });
+      }
+
+      async function startGame(mode, start, target) {
+        state.mode = mode;
+        state.startArticle = start;
+        state.targetArticle = target;
+        state.clicks = 0;
+        
+        UI.game.targetTitle.textContent = target;
+        UI.game.clickCount.textContent = '0';
+        UI.game.content.innerHTML = '';
+        
+        showScreen('game');
+        await loadArticle(start);
+      }
+
+      async function loadArticle(title) {
+        showLoading(true);
+        UI.game.content.scrollTop = 0;
+        
+        try {
+          const url = `${API_BASE}?action=parse&prop=text&format=json&origin=*&page=${encodeURIComponent(title)}&redirects=1`;
+          const res = await fetch(url);
+          const data = await res.json();
+          
+          if(data.error) throw new Error(data.error.info);
+          
+          state.currentArticle = data.parse.title;
+          UI.game.currentTitle.textContent = state.currentArticle;
+          UI.game.content.innerHTML = data.parse.text['*'];
+          
+          interceptLinks();
+          
+          // Check Win
+          if(state.currentArticle === state.targetArticle) {
+            handleWin();
+          }
+        } catch(e) {
+          console.error(e);
+          UI.game.content.innerHTML = '<div style="color:var(--md-sys-color-error); font-weight:700; text-align:center; padding: 20px;">記事の読み込みに失敗しました。</div>';
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      function interceptLinks() {
+        const links = UI.game.content.querySelectorAll('a');
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          
+          if (href && (href.startsWith('/wiki/') || href.startsWith('./'))) {
+            // Internal Wiki Link
+            const titlePart = href.startsWith('./') ? href.substring(2) : href.substring(6);
+            const decodedTitle = decodeURIComponent(titlePart.split('#')[0]);
+            
+            // Disable special namespaces (e.g., File:, Wikipedia:)
+            if(titlePart.includes(':') && !titlePart.startsWith('Category:')) {
+               link.classList.add('disabled');
+               link.addEventListener('click', e => e.preventDefault());
+               return;
+            }
+
+            link.addEventListener('click', e => {
+              e.preventDefault();
+              if(decodedTitle) {
+                state.clicks++;
+                UI.game.clickCount.textContent = state.clicks;
+                loadArticle(decodedTitle);
+              }
+            });
+          } else {
+            // External or invalid link
+            link.classList.add('disabled');
+            link.addEventListener('click', e => e.preventDefault());
+          }
+        });
+      }
+
+      function handleWin() {
+        saveToLocalHistory();
+        
+        UI.result.clicksDisplay.textContent = state.clicks;
+        UI.result.modeText.textContent = `${state.startArticle} ➡️ ${state.targetArticle}`;
+        
+        showScreen('result');
+      }
+
+      // Event Listeners for Start Screen Buttons
+      document.getElementById('btn-daily-1').addEventListener('click', () => {
+        if(!state.dailyData) return;
+        startGame('daily1', CONST_TIGHTS, state.dailyData.article);
+      });
+
+      document.getElementById('btn-daily-2').addEventListener('click', () => {
+        if(!state.dailyData) return;
+        startGame('daily2', state.dailyData.article, CONST_TIGHTS);
+      });
+
+      document.getElementById('btn-random').addEventListener('click', async () => {
+        showLoading(true);
+        try {
+          const randomArticles = await fetchWikiRandom();
+          startGame('random', randomArticles[0], randomArticles[1]);
+        } catch(e) {
+          alert('ランダム記事の取得に失敗しました');
+        } finally {
+          showLoading(false);
+        }
+      });
+
+      // Retire & Home Buttons
+      document.getElementById('btn-retire').addEventListener('click', () => {
+        if(confirm('トップ画面に戻りますか？現在の進行状況は失われます。')) {
+          showScreen('start');
+        }
+      });
+      document.getElementById('btn-result-home').addEventListener('click', () => {
+        showScreen('start');
+      });
+
+      // Share Button
+      document.getElementById('btn-share').addEventListener('click', () => {
+        const text = `ウィキペディアゲーム(${state.startArticle}➡️${state.targetArticle})を${state.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+      });
+
+      // Init
+      window.addEventListener('DOMContentLoaded', () => {
+        loadDailyJson();
+        renderLocalHistory();
+      });
+    </script>
+  </body>
+</html>
