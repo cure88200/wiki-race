@@ -32,3 +32,7 @@ jobs:
   trigger-deploy:
     needs: update-daily
     uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
