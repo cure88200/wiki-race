@@ -92,6 +92,10 @@
       .screen.active {
         display: flex;
       }
+      .screen-narrow {
+        max-width: 600px;
+        margin: 0 auto;
+      }
 
       @keyframes fadeIn {
         from {
@@ -312,6 +316,57 @@
         line-height: 1;
       }
 
+      .text-light {
+        color: var(--md-sys-color-on-surface-variant);
+        font-weight: 500;
+        font-size: 0.9em;
+        margin: 0 4px;
+      }
+
+      .path-details {
+        background-color: var(--md-sys-color-surface-container);
+        border-radius: var(--md-shape-corner-small);
+        border: 1px solid rgba(128, 128, 128, 0.12);
+        overflow: hidden;
+      }
+      .path-summary {
+        padding: 10px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--md-sys-color-on-surface-variant);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+      }
+      .path-summary::-webkit-details-marker {
+        display: none;
+      }
+      .path-summary svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+        transition: transform 0.25s ease;
+      }
+      .path-details[open] .path-summary svg {
+        transform: rotate(180deg);
+      }
+      .path-content {
+        padding: 0 12px 12px 12px;
+        font-size: 13px;
+        color: var(--md-sys-color-on-surface);
+      }
+      .path-list {
+        padding-left: 24px;
+        margin: 0;
+        line-height: 1.6;
+      }
+      .path-list li {
+        margin-bottom: 4px;
+      }
+
       .loading-overlay {
         position: absolute;
         inset: 0;
@@ -381,7 +436,7 @@
       </div>
 
       <!-- Start Screen -->
-      <div id="screen-start" class="screen active">
+      <div id="screen-start" class="screen screen-narrow active">
         <h1></h1>
         <p class="subtitle"></p>
 
@@ -403,7 +458,7 @@
               font-weight: 700;
             "
           >
-            今日のデイリー記事
+            デイリーチャレンジ
           </div>
           <div
             id="today-daily-article-display"
@@ -419,10 +474,10 @@
         </div>
 
         <button class="btn btn-primary" id="btn-daily-1">
-          デイリー (タイツ ➡️ 今日の記事)
+          デイリー (タイツ → 今日の記事)
         </button>
         <button class="btn btn-primary" id="btn-daily-2">
-          デイリー (今日の記事 ➡️ タイツ)
+          デイリー (今日の記事 → タイツ)
         </button>
         <button class="btn btn-secondary" id="btn-random">
           エンドレス (ランダム出題)
@@ -489,7 +544,7 @@
       </div>
 
       <!-- Result Screen -->
-      <div id="screen-result" class="screen">
+      <div id="screen-result" class="screen screen-narrow">
         <div class="result-box">
           <h1 style="margin: 0; font-size: 32px">GOAL!🎉</h1>
           <p class="subtitle" id="result-mode-text">デイリーモードクリア！</p>
@@ -506,6 +561,11 @@
             </div>
             <div class="result-clicks" id="result-clicks-display">0</div>
           </div>
+
+          <div
+            id="result-path-container"
+            style="width: 100%; text-align: left; margin-top: 8px"
+          ></div>
         </div>
 
         <button class="btn btn-primary" id="btn-share">
@@ -545,6 +605,7 @@
         targetArticle: "",
         currentArticle: "",
         clicks: 0,
+        path: [],
         dailyData: null, // { article }
       };
 
@@ -636,8 +697,8 @@
 
       function updateTodayDailyUI(articleName) {
         UI.start.todayDailyArticle.textContent = articleName;
-        UI.start.btnDaily1.innerHTML = `デイリー (タイツ ➡️ ${articleName})`;
-        UI.start.btnDaily2.innerHTML = `デイリー (${articleName} ➡️ タイツ)`;
+        UI.start.btnDaily1.innerHTML = `デイリー (タイツ <span class="text-light">から</span> ${articleName})`;
+        UI.start.btnDaily2.innerHTML = `デイリー (${articleName} <span class="text-light">から</span> タイツ)`;
       }
 
       function renderPastDailyList(pastList) {
@@ -660,10 +721,10 @@
             </div>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
               <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${CONST_TIGHTS}', '${item.article}')">
-                タイツ ➡️ ${item.article}
+                タイツ <span class="text-light">から</span> ${item.article}
               </button>
               <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${item.article}', '${CONST_TIGHTS}')">
-                ${item.article} ➡️ タイツ
+                ${item.article} <span class="text-light">から</span> タイツ
               </button>
             </div>
           `;
@@ -681,6 +742,7 @@
           target: state.targetArticle,
           clicks: state.clicks,
           mode: state.mode,
+          path: state.path,
         });
         if (history.length > 20) history = history.slice(0, 20);
         localStorage.setItem("wiki_racing_history", JSON.stringify(history));
@@ -698,20 +760,64 @@
         }
 
         UI.lists.localHistory.innerHTML = "";
-        history.forEach((item) => {
+        history.forEach((item, index) => {
           const div = document.createElement("div");
           div.className = "list-item";
+
+          const pathArr = item.path || [];
+          let pathHtml = "";
+          if (pathArr.length > 0) {
+            pathHtml = `
+              <details class="path-details" style="margin-top: 8px;">
+                <summary class="path-summary">
+                  <span>経路を見る</span>
+                  <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                </summary>
+                <div class="path-content">
+                  <ol class="path-list">
+                    ${pathArr.map((p) => `<li>${p}</li>`).join("")}
+                  </ol>
+                </div>
+              </details>
+            `;
+          }
+
           div.innerHTML = `
             <div class="list-item-header">
               <span>${item.date}</span>
               <span style="color: var(--md-sys-color-primary); font-weight:700;">${item.clicks}手クリア</span>
             </div>
             <div class="list-item-title">
-              ${item.start} ➡️ ${item.target}
+              ${item.start} <span class="text-light">から</span> ${item.target}
             </div>
+            ${pathHtml}
+            <button class="btn btn-secondary btn-share-history" data-index="${index}" style="height: 32px; font-size: 12px; padding: 0 12px; margin-top: 8px; width: 100%;">
+              <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              シェア
+            </button>
           `;
           UI.lists.localHistory.appendChild(div);
         });
+
+        // シェアボタンのイベントリスナー追加
+        document.querySelectorAll(".btn-share-history").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const idx = e.currentTarget.getAttribute("data-index");
+            shareHistoryItem(idx);
+          });
+        });
+      }
+
+      function shareHistoryItem(index) {
+        const history = JSON.parse(
+          localStorage.getItem("wiki_racing_history") || "[]",
+        );
+        const item = history[index];
+        if (item) {
+          const text = `ウィキペディアゲーム(${item.start}から${item.target})を${item.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
+          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+          window.open(url, "_blank");
+        }
       }
 
       async function startGame(mode, start, target) {
@@ -719,6 +825,7 @@
         state.startArticle = start;
         state.targetArticle = target;
         state.clicks = 0;
+        state.path = [start];
 
         UI.game.targetTitle.textContent = target;
         UI.game.clickCount.textContent = "0";
@@ -781,6 +888,7 @@
               e.preventDefault();
               if (decodedTitle) {
                 state.clicks++;
+                state.path.push(decodedTitle);
                 UI.game.clickCount.textContent = state.clicks;
                 loadArticle(decodedTitle);
               }
@@ -797,7 +905,22 @@
         saveToLocalHistory();
 
         UI.result.clicksDisplay.textContent = state.clicks;
-        UI.result.modeText.textContent = `${state.startArticle} ➡️ ${state.targetArticle}`;
+        UI.result.modeText.innerHTML = `${state.startArticle} <span class="text-light">から</span> ${state.targetArticle}`;
+
+        let pathHtml = `
+          <details class="path-details">
+            <summary class="path-summary">
+              <span>経路を見る</span>
+              <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+            </summary>
+            <div class="path-content">
+              <ol class="path-list">
+                ${state.path.map((p) => `<li>${p}</li>`).join("")}
+              </ol>
+            </div>
+          </details>
+        `;
+        document.getElementById("result-path-container").innerHTML = pathHtml;
 
         showScreen("result");
       }
@@ -841,7 +964,7 @@
 
       // Share Button
       document.getElementById("btn-share").addEventListener("click", () => {
-        const text = `ウィキペディアゲーム(${state.startArticle}➡️${state.targetArticle})を${state.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
+        const text = `ウィキペディアゲーム(${state.startArticle}から${state.targetArticle})を${state.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, "_blank");
       });
