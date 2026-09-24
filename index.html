@@ -94,18 +94,30 @@
       }
 
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      h1, h2 {
+      h1,
+      h2 {
         font-weight: 700;
         color: var(--md-sys-color-on-surface);
         text-align: center;
         letter-spacing: -0.5px;
       }
-      h1 { font-size: 28px; margin-bottom: 8px; }
-      h2 { font-size: 20px; }
+      h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      h2 {
+        font-size: 20px;
+      }
 
       .subtitle {
         text-align: center;
@@ -156,7 +168,7 @@
         color: var(--md-sys-color-on-surface);
         border: 2px solid var(--md-sys-color-outline);
       }
-      
+
       .btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -248,7 +260,7 @@
       }
 
       /* Clean up Wikipedia HTML */
-      .wiki-container .infobox, 
+      .wiki-container .infobox,
       .wiki-container .navbox,
       .wiki-container .mw-empty-elt,
       .wiki-container .reference,
@@ -259,7 +271,9 @@
         display: none !important;
       }
 
-      .wiki-container h1, .wiki-container h2, .wiki-container h3 {
+      .wiki-container h1,
+      .wiki-container h2,
+      .wiki-container h3 {
         margin-top: 1em;
         margin-bottom: 0.5em;
         border-bottom: 1px solid var(--md-sys-color-outline);
@@ -324,7 +338,11 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
       footer {
         margin-top: 24px;
@@ -332,25 +350,72 @@
         color: var(--md-sys-color-on-surface-variant);
         text-align: center;
       }
+
+      /* フッターのリンク用スタイル */
+      footer a {
+        color: var(--md-sys-color-on-surface-variant);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.2s ease;
+      }
+      footer a:hover {
+        color: var(--md-sys-color-on-surface);
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <div class="app-container">
-      
       <!-- Loading Overlay -->
       <div id="loading" class="loading-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);">通信中...</p>
+        <p
+          style="
+            margin-top: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+          "
+        >
+          通信中...
+        </p>
       </div>
 
       <!-- Start Screen -->
       <div id="screen-start" class="screen active">
         <h1></h1>
         <p class="subtitle"></p>
-        
-        <div id="today-daily-container" style="background-color: var(--md-sys-color-surface); border-radius: var(--md-shape-corner-medium); padding: 16px; border: 2px solid var(--md-sys-color-primary); text-align: center; margin-bottom: 8px;">
-          <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">今日のデイリー記事</div>
-          <div id="today-daily-article-display" style="font-size: 24px; font-weight: 900; color: var(--md-sys-color-on-surface); margin-top: 4px;">-</div>
+
+        <div
+          id="today-daily-container"
+          style="
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-shape-corner-medium);
+            padding: 16px;
+            border: 2px solid var(--md-sys-color-primary);
+            text-align: center;
+            margin-bottom: 8px;
+          "
+        >
+          <div
+            style="
+              font-size: 14px;
+              color: var(--md-sys-color-on-surface-variant);
+              font-weight: 700;
+            "
+          >
+            今日のデイリー記事
+          </div>
+          <div
+            id="today-daily-article-display"
+            style="
+              font-size: 24px;
+              font-weight: 900;
+              color: var(--md-sys-color-on-surface);
+              margin-top: 4px;
+            "
+          >
+            -
+          </div>
         </div>
 
         <button class="btn btn-primary" id="btn-daily-1">
@@ -363,14 +428,16 @@
           エンドレス (ランダム出題)
         </button>
 
-        <div style="height: 16px;"></div>
-        
-        <h2 style="font-size: 16px; text-align: left;">過去のデイリー問題</h2>
+        <div style="height: 16px"></div>
+
+        <h2 style="font-size: 16px; text-align: left">過去のデイリー問題</h2>
         <div class="list-container" id="past-daily-list">
           <div class="empty-text">読み込み中...</div>
         </div>
 
-        <h2 style="font-size: 16px; text-align: left; margin-top: 8px;">あなたのプレイ履歴</h2>
+        <h2 style="font-size: 16px; text-align: left; margin-top: 8px">
+          あなたのプレイ履歴
+        </h2>
         <div class="list-container" id="local-history-list">
           <div class="empty-text">まだ履歴がありません</div>
         </div>
@@ -379,16 +446,36 @@
       <!-- Game Screen -->
       <div id="screen-game" class="screen">
         <div class="game-header">
-          <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">現在地</div>
-          <div id="current-article-title" style="font-size: 20px; font-weight: 900;">-</div>
-          
-          <div style="margin: 8px 0; border-top: 1px dashed var(--md-sys-color-outline);"></div>
-          
+          <div
+            style="
+              font-size: 12px;
+              color: var(--md-sys-color-on-surface-variant);
+              font-weight: 700;
+            "
+          >
+            現在地
+          </div>
+          <div
+            id="current-article-title"
+            style="font-size: 20px; font-weight: 900"
+          >
+            -
+          </div>
+
+          <div
+            style="
+              margin: 8px 0;
+              border-top: 1px dashed var(--md-sys-color-outline);
+            "
+          ></div>
+
           <div class="target-info">
             🏁 ゴール: <span id="target-article-title"></span>
           </div>
           <div>
-            <span class="clicks-badge">クリック数: <span id="click-count">0</span></span>
+            <span class="clicks-badge"
+              >クリック数: <span id="click-count">0</span></span
+            >
           </div>
         </div>
 
@@ -404,112 +491,144 @@
       <!-- Result Screen -->
       <div id="screen-result" class="screen">
         <div class="result-box">
-          <h1 style="margin: 0; font-size: 32px;">GOAL!🎉</h1>
+          <h1 style="margin: 0; font-size: 32px">GOAL!🎉</h1>
           <p class="subtitle" id="result-mode-text">デイリーモードクリア！</p>
-          
+
           <div>
-            <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">クリア手番</div>
+            <div
+              style="
+                font-size: 14px;
+                color: var(--md-sys-color-on-surface-variant);
+                font-weight: 700;
+              "
+            >
+              クリア手番
+            </div>
             <div class="result-clicks" id="result-clicks-display">0</div>
           </div>
         </div>
 
         <button class="btn btn-primary" id="btn-share">
-          <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <svg
+            style="width: 18px; height: 18px; fill: currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+            />
+          </svg>
           X (Twitter) でシェア
         </button>
         <button class="btn btn-secondary" id="btn-result-home">
           トップに戻る
         </button>
       </div>
-
     </div>
-    
+
     <footer>
-      Wikiホップ - UI System Match
+      <a href="https://x.com/cure88200" target="_blank" rel="noopener"
+        >cure88200</a
+      >
+      -
+      <span style="font-family: monospace; font-size: 11px"
+        >__BUILD_VERSION__</span
+      >
     </footer>
 
     <script>
       const API_BASE = "https://ja.wikipedia.org/w/api.php";
       const CONST_TIGHTS = "タイツ";
-      
+
       let state = {
         mode: "", // 'daily1', 'daily2', 'random', 'past'
         startArticle: "",
         targetArticle: "",
         currentArticle: "",
         clicks: 0,
-        dailyData: null // { article }
+        dailyData: null, // { article }
       };
 
       const UI = {
         screens: {
-          start: document.getElementById('screen-start'),
-          game: document.getElementById('screen-game'),
-          result: document.getElementById('screen-result')
+          start: document.getElementById("screen-start"),
+          game: document.getElementById("screen-game"),
+          result: document.getElementById("screen-result"),
         },
-        loading: document.getElementById('loading'),
+        loading: document.getElementById("loading"),
         lists: {
-          pastDaily: document.getElementById('past-daily-list'),
-          localHistory: document.getElementById('local-history-list')
+          pastDaily: document.getElementById("past-daily-list"),
+          localHistory: document.getElementById("local-history-list"),
         },
         start: {
-          todayDailyArticle: document.getElementById('today-daily-article-display'),
-          btnDaily1: document.getElementById('btn-daily-1'),
-          btnDaily2: document.getElementById('btn-daily-2')
+          todayDailyArticle: document.getElementById(
+            "today-daily-article-display",
+          ),
+          btnDaily1: document.getElementById("btn-daily-1"),
+          btnDaily2: document.getElementById("btn-daily-2"),
         },
         game: {
-          currentTitle: document.getElementById('current-article-title'),
-          targetTitle: document.getElementById('target-article-title'),
-          clickCount: document.getElementById('click-count'),
-          content: document.getElementById('wiki-content')
+          currentTitle: document.getElementById("current-article-title"),
+          targetTitle: document.getElementById("target-article-title"),
+          clickCount: document.getElementById("click-count"),
+          content: document.getElementById("wiki-content"),
         },
         result: {
-          modeText: document.getElementById('result-mode-text'),
-          clicksDisplay: document.getElementById('result-clicks-display')
-        }
+          modeText: document.getElementById("result-mode-text"),
+          clicksDisplay: document.getElementById("result-clicks-display"),
+        },
       };
 
       function showScreen(screenName) {
-        Object.values(UI.screens).forEach(el => el.classList.remove('active'));
-        UI.screens[screenName].classList.add('active');
+        Object.values(UI.screens).forEach((el) =>
+          el.classList.remove("active"),
+        );
+        UI.screens[screenName].classList.add("active");
       }
 
       function showLoading(show) {
-        if(show) UI.loading.classList.add('active');
-        else UI.loading.classList.remove('active');
+        if (show) UI.loading.classList.add("active");
+        else UI.loading.classList.remove("active");
       }
 
       async function fetchWikiRandom() {
         const url = `${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=2&format=json&origin=*`;
         const res = await fetch(url);
         const data = await res.json();
-        return data.query.random.map(r => r.title);
+        return data.query.random.map((r) => r.title);
       }
 
       async function loadDailyJson() {
         try {
-          const res = await fetch('./daily_history.json');
-          if(!res.ok) throw new Error("File not found");
+          const res = await fetch("./daily_history.json");
+          if (!res.ok) throw new Error("File not found");
           const history = await res.json();
-          
-          if(history && history.length > 0) {
+
+          if (history && history.length > 0) {
             state.dailyData = history[0]; // Latest is today's
             updateTodayDailyUI(state.dailyData.article);
             renderPastDailyList(history.slice(1)); // Rest are past
           } else {
             throw new Error("Empty array");
           }
-        } catch(e) {
+        } catch (e) {
           console.warn("Could not load daily_history.json. Using fallback.");
           // Fallback if file doesn't exist yet (e.g. before Action runs)
-          UI.lists.pastDaily.innerHTML = '<div class="empty-text">過去のデータがありません</div>';
-          
+          UI.lists.pastDaily.innerHTML =
+            '<div class="empty-text">過去のデータがありません</div>';
+
           // Generate a deterministic fallback based on today's date
-          const dateStr = new Date().toLocaleDateString('ja-JP');
-          const fallbackPool = ["日本", "宇宙", "徳川家康", "インターネット", "寿司", "富士山"];
+          const dateStr = new Date().toLocaleDateString("ja-JP");
+          const fallbackPool = [
+            "日本",
+            "宇宙",
+            "徳川家康",
+            "インターネット",
+            "寿司",
+            "富士山",
+          ];
           const seed = dateStr.length; // Simple mock seed
           state.dailyData = {
-             article: fallbackPool[seed % fallbackPool.length]
+            article: fallbackPool[seed % fallbackPool.length],
           };
           updateTodayDailyUI(state.dailyData.article);
         }
@@ -522,15 +641,16 @@
       }
 
       function renderPastDailyList(pastList) {
-        if(pastList.length === 0) {
-          UI.lists.pastDaily.innerHTML = '<div class="empty-text">過去のデータがありません</div>';
+        if (pastList.length === 0) {
+          UI.lists.pastDaily.innerHTML =
+            '<div class="empty-text">過去のデータがありません</div>';
           return;
         }
-        
-        UI.lists.pastDaily.innerHTML = '';
-        pastList.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
+
+        UI.lists.pastDaily.innerHTML = "";
+        pastList.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "list-item";
           div.innerHTML = `
             <div class="list-item-header">
               <span>${item.date}</span>
@@ -552,30 +672,35 @@
       }
 
       function saveToLocalHistory() {
-        let history = JSON.parse(localStorage.getItem('wiki_racing_history') || '[]');
+        let history = JSON.parse(
+          localStorage.getItem("wiki_racing_history") || "[]",
+        );
         history.unshift({
-          date: new Date().toLocaleString('ja-JP'),
+          date: new Date().toLocaleString("ja-JP"),
           start: state.startArticle,
           target: state.targetArticle,
           clicks: state.clicks,
-          mode: state.mode
+          mode: state.mode,
         });
-        if(history.length > 20) history = history.slice(0, 20);
-        localStorage.setItem('wiki_racing_history', JSON.stringify(history));
+        if (history.length > 20) history = history.slice(0, 20);
+        localStorage.setItem("wiki_racing_history", JSON.stringify(history));
         renderLocalHistory();
       }
 
       function renderLocalHistory() {
-        const history = JSON.parse(localStorage.getItem('wiki_racing_history') || '[]');
-        if(history.length === 0) {
-          UI.lists.localHistory.innerHTML = '<div class="empty-text">まだ履歴がありません</div>';
+        const history = JSON.parse(
+          localStorage.getItem("wiki_racing_history") || "[]",
+        );
+        if (history.length === 0) {
+          UI.lists.localHistory.innerHTML =
+            '<div class="empty-text">まだ履歴がありません</div>';
           return;
         }
-        
-        UI.lists.localHistory.innerHTML = '';
-        history.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
+
+        UI.lists.localHistory.innerHTML = "";
+        history.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "list-item";
           div.innerHTML = `
             <div class="list-item-header">
               <span>${item.date}</span>
@@ -594,64 +719,67 @@
         state.startArticle = start;
         state.targetArticle = target;
         state.clicks = 0;
-        
+
         UI.game.targetTitle.textContent = target;
-        UI.game.clickCount.textContent = '0';
-        UI.game.content.innerHTML = '';
-        
-        showScreen('game');
+        UI.game.clickCount.textContent = "0";
+        UI.game.content.innerHTML = "";
+
+        showScreen("game");
         await loadArticle(start);
       }
 
       async function loadArticle(title) {
         showLoading(true);
         UI.game.content.scrollTop = 0;
-        
+
         try {
           const url = `${API_BASE}?action=parse&prop=text&format=json&origin=*&page=${encodeURIComponent(title)}&redirects=1`;
           const res = await fetch(url);
           const data = await res.json();
-          
-          if(data.error) throw new Error(data.error.info);
-          
+
+          if (data.error) throw new Error(data.error.info);
+
           state.currentArticle = data.parse.title;
           UI.game.currentTitle.textContent = state.currentArticle;
-          UI.game.content.innerHTML = data.parse.text['*'];
-          
+          UI.game.content.innerHTML = data.parse.text["*"];
+
           interceptLinks();
-          
+
           // Check Win
-          if(state.currentArticle === state.targetArticle) {
+          if (state.currentArticle === state.targetArticle) {
             handleWin();
           }
-        } catch(e) {
+        } catch (e) {
           console.error(e);
-          UI.game.content.innerHTML = '<div style="color:var(--md-sys-color-error); font-weight:700; text-align:center; padding: 20px;">記事の読み込みに失敗しました。</div>';
+          UI.game.content.innerHTML =
+            '<div style="color:var(--md-sys-color-error); font-weight:700; text-align:center; padding: 20px;">記事の読み込みに失敗しました。</div>';
         } finally {
           showLoading(false);
         }
       }
 
       function interceptLinks() {
-        const links = UI.game.content.querySelectorAll('a');
-        links.forEach(link => {
-          const href = link.getAttribute('href');
-          
-          if (href && (href.startsWith('/wiki/') || href.startsWith('./'))) {
+        const links = UI.game.content.querySelectorAll("a");
+        links.forEach((link) => {
+          const href = link.getAttribute("href");
+
+          if (href && (href.startsWith("/wiki/") || href.startsWith("./"))) {
             // Internal Wiki Link
-            const titlePart = href.startsWith('./') ? href.substring(2) : href.substring(6);
-            const decodedTitle = decodeURIComponent(titlePart.split('#')[0]);
-            
+            const titlePart = href.startsWith("./")
+              ? href.substring(2)
+              : href.substring(6);
+            const decodedTitle = decodeURIComponent(titlePart.split("#")[0]);
+
             // Disable special namespaces (e.g., File:, Wikipedia:)
-            if(titlePart.includes(':') && !titlePart.startsWith('Category:')) {
-               link.classList.add('disabled');
-               link.addEventListener('click', e => e.preventDefault());
-               return;
+            if (titlePart.includes(":") && !titlePart.startsWith("Category:")) {
+              link.classList.add("disabled");
+              link.addEventListener("click", (e) => e.preventDefault());
+              return;
             }
 
-            link.addEventListener('click', e => {
+            link.addEventListener("click", (e) => {
               e.preventDefault();
-              if(decodedTitle) {
+              if (decodedTitle) {
                 state.clicks++;
                 UI.game.clickCount.textContent = state.clicks;
                 loadArticle(decodedTitle);
@@ -659,63 +787,67 @@
             });
           } else {
             // External or invalid link
-            link.classList.add('disabled');
-            link.addEventListener('click', e => e.preventDefault());
+            link.classList.add("disabled");
+            link.addEventListener("click", (e) => e.preventDefault());
           }
         });
       }
 
       function handleWin() {
         saveToLocalHistory();
-        
+
         UI.result.clicksDisplay.textContent = state.clicks;
         UI.result.modeText.textContent = `${state.startArticle} ➡️ ${state.targetArticle}`;
-        
-        showScreen('result');
+
+        showScreen("result");
       }
 
       // Event Listeners for Start Screen Buttons
-      document.getElementById('btn-daily-1').addEventListener('click', () => {
-        if(!state.dailyData) return;
-        startGame('daily1', CONST_TIGHTS, state.dailyData.article);
+      document.getElementById("btn-daily-1").addEventListener("click", () => {
+        if (!state.dailyData) return;
+        startGame("daily1", CONST_TIGHTS, state.dailyData.article);
       });
 
-      document.getElementById('btn-daily-2').addEventListener('click', () => {
-        if(!state.dailyData) return;
-        startGame('daily2', state.dailyData.article, CONST_TIGHTS);
+      document.getElementById("btn-daily-2").addEventListener("click", () => {
+        if (!state.dailyData) return;
+        startGame("daily2", state.dailyData.article, CONST_TIGHTS);
       });
 
-      document.getElementById('btn-random').addEventListener('click', async () => {
-        showLoading(true);
-        try {
-          const randomArticles = await fetchWikiRandom();
-          startGame('random', randomArticles[0], randomArticles[1]);
-        } catch(e) {
-          alert('ランダム記事の取得に失敗しました');
-        } finally {
-          showLoading(false);
-        }
-      });
+      document
+        .getElementById("btn-random")
+        .addEventListener("click", async () => {
+          showLoading(true);
+          try {
+            const randomArticles = await fetchWikiRandom();
+            startGame("random", randomArticles[0], randomArticles[1]);
+          } catch (e) {
+            alert("ランダム記事の取得に失敗しました");
+          } finally {
+            showLoading(false);
+          }
+        });
 
       // Retire & Home Buttons
-      document.getElementById('btn-retire').addEventListener('click', () => {
-        if(confirm('トップ画面に戻りますか？現在の進行状況は失われます。')) {
-          showScreen('start');
+      document.getElementById("btn-retire").addEventListener("click", () => {
+        if (confirm("トップ画面に戻りますか？現在の進行状況は失われます。")) {
+          showScreen("start");
         }
       });
-      document.getElementById('btn-result-home').addEventListener('click', () => {
-        showScreen('start');
-      });
+      document
+        .getElementById("btn-result-home")
+        .addEventListener("click", () => {
+          showScreen("start");
+        });
 
       // Share Button
-      document.getElementById('btn-share').addEventListener('click', () => {
+      document.getElementById("btn-share").addEventListener("click", () => {
         const text = `ウィキペディアゲーム(${state.startArticle}➡️${state.targetArticle})を${state.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
+        window.open(url, "_blank");
       });
 
       // Init
-      window.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener("DOMContentLoaded", () => {
         loadDailyJson();
         renderLocalHistory();
       });
