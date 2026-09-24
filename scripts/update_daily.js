@@ -1,34 +1,63 @@
-const fs = require('fs');
+const fs = require("fs");
+const path = require("path");
 
 async function updateDaily() {
-  // Wikipedia APIからランダムな記事を1つ取得
-  const res = await fetch("https://ja.wikipedia.org/w/api.php?action=query&format=json&list=random&rnnamespace=0&rnlimit=1");
-  const data = await res.json();
-  const title = data.query.random[0].title;
-  
-  // 日本時間で今日の日付を取得
-  const jpDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-  const dateStr = jpDate.getFullYear() + "-" + 
-                  String(jpDate.getMonth() + 1).padStart(2, '0') + "-" + 
-                  String(jpDate.getDate()).padStart(2, '0');
+  try {
+    // Fetch 1 random article from Wikipedia
+    const url =
+      "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json";
 
-  // 既存の履歴を読み込み
-  const historyPath = 'daily_history.json';
-  let history = [];
-  if (fs.existsSync(historyPath)) {
-    history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "WikiHopDailyBot/1.0 (https://github.com/cure88200/wiki-race)",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const article = data.query.random[0].title;
+
+    const filePath = path.join(__dirname, "../daily_history.json");
+    let history = [];
+    if (fs.existsSync(filePath)) {
+      history = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    }
+
+    const today = new Date();
+    // Format to YYYY-MM-DD in JST
+    const jstFormatter = new Intl.DateTimeFormat("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const [{ value: year }, , { value: month }, , { value: day }] =
+      jstFormatter.formatToParts(today);
+    const dateStr = `${year}-${month}-${day}`;
+
+    // Prevent duplicate entry for the same day
+    if (!history.find((h) => h.date === dateStr)) {
+      history.unshift({
+        date: dateStr,
+        article: article,
+      });
+
+      // Keep history length reasonable (e.g. max 100 days)
+      if (history.length > 100) history = history.slice(0, 100);
+
+      fs.writeFileSync(filePath, JSON.stringify(history, null, 2));
+      console.log(`Successfully updated JSON for ${dateStr}: ${article}`);
+    } else {
+      console.log(`Already updated for today (${dateStr}). Skipping.`);
+    }
+  } catch (error) {
+    console.error("Error updating daily history:", error);
+    process.exit(1);
   }
-  
-  // すでに今日のデータがあればスキップ
-  if (history.length > 0 && history[0].date === dateStr) {
-    console.log("Already updated today.");
-    return;
-  }
-  
-  // 先頭に追加して保存 (過去問として蓄積)
-  history.unshift({ date: dateStr, target: title });
-  fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
-  console.log(`Added daily target: ${title} for ${dateStr}`);
 }
 
 updateDaily();
