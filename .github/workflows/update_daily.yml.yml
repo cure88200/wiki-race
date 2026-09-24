@@ -1,0 +1,34 @@
+name: Update Daily Wikipedia Game
+
+on:
+  schedule:
+    - cron: "0 15 * * *" # 日本時間の午前0時
+  workflow_dispatch:
+
+jobs:
+  update-daily:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run update script
+        run: node scripts/update_daily.js
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add daily_history.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update daily_history.json" && git push)
+
+  trigger-deploy:
+    needs: update-daily
+    uses: ./.github/workflows/deploy.yml
