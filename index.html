@@ -399,6 +399,30 @@
         }
       }
 
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background-color: var(--md-sys-color-on-surface);
+        color: var(--md-sys-color-surface);
+        padding: 12px 24px;
+        border-radius: var(--md-shape-corner-full);
+        font-size: 14px;
+        font-weight: 700;
+        opacity: 0;
+        transition:
+          transform 0.3s ease,
+          opacity 0.3s ease;
+        z-index: 1000;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
       footer {
         margin-top: 24px;
         font-size: 12px;
@@ -435,22 +459,15 @@
         </p>
       </div>
 
+      <!-- Toast -->
+      <div id="toast" class="toast"></div>
+
       <!-- Start Screen -->
       <div id="screen-start" class="screen screen-narrow active">
         <h1></h1>
         <p class="subtitle"></p>
 
-        <div
-          id="today-daily-container"
-          style="
-            background-color: var(--md-sys-color-surface);
-            border-radius: var(--md-shape-corner-medium);
-            padding: 16px;
-            border: 2px solid var(--md-sys-color-primary);
-            text-align: center;
-            margin-bottom: 8px;
-          "
-        >
+        <div style="text-align: center; margin-bottom: 8px">
           <div
             style="
               font-size: 14px;
@@ -458,7 +475,7 @@
               font-weight: 700;
             "
           >
-            デイリーチャレンジ
+            今日のデイリー記事
           </div>
           <div
             id="today-daily-article-display"
@@ -473,14 +490,27 @@
           </div>
         </div>
 
-        <button class="btn btn-primary" id="btn-daily-1">
-          デイリー (タイツ → 今日の記事)
+        <button class="btn btn-primary" id="btn-toggle-daily">
+          デイリーチャレンジ
         </button>
-        <button class="btn btn-primary" id="btn-daily-2">
-          デイリー (今日の記事 → タイツ)
-        </button>
-        <button class="btn btn-secondary" id="btn-random">
-          エンドレス (ランダム出題)
+        <div
+          id="daily-buttons-container"
+          style="
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin: 0 16px;
+          "
+        >
+          <button class="btn btn-secondary" id="btn-daily-1">
+            タイツ から 〇〇
+          </button>
+          <button class="btn btn-secondary" id="btn-daily-2">
+            〇〇 から タイツ
+          </button>
+        </div>
+        <button class="btn btn-primary" id="btn-random">
+          エンドレスモード
         </button>
 
         <div style="height: 16px"></div>
@@ -549,17 +579,45 @@
           <h1 style="margin: 0; font-size: 32px">GOAL!🎉</h1>
           <p class="subtitle" id="result-mode-text">デイリーモードクリア！</p>
 
-          <div>
-            <div
-              style="
-                font-size: 14px;
-                color: var(--md-sys-color-on-surface-variant);
-                font-weight: 700;
-              "
-            >
-              クリア手番
+          <div
+            style="
+              display: flex;
+              gap: 32px;
+              justify-content: center;
+              width: 100%;
+              margin-top: 8px;
+            "
+          >
+            <div style="text-align: center">
+              <div
+                style="
+                  font-size: 14px;
+                  color: var(--md-sys-color-on-surface-variant);
+                  font-weight: 700;
+                "
+              >
+                クリア手番
+              </div>
+              <div class="result-clicks">
+                <span id="result-clicks-display">0</span
+                ><span style="font-size: 20px; margin-left: 2px">回</span>
+              </div>
             </div>
-            <div class="result-clicks" id="result-clicks-display">0</div>
+            <div style="text-align: center">
+              <div
+                style="
+                  font-size: 14px;
+                  color: var(--md-sys-color-on-surface-variant);
+                  font-weight: 700;
+                "
+              >
+                クリアタイム
+              </div>
+              <div class="result-clicks">
+                <span id="result-time-display">0</span
+                ><span style="font-size: 20px; margin-left: 2px">秒</span>
+              </div>
+            </div>
           </div>
 
           <div
@@ -568,17 +626,38 @@
           ></div>
         </div>
 
-        <button class="btn btn-primary" id="btn-share">
-          <svg
-            style="width: 18px; height: 18px; fill: currentColor"
-            viewBox="0 0 24 24"
+        <div style="display: flex; gap: 8px; width: 100%">
+          <button
+            class="btn btn-primary"
+            id="btn-share"
+            style="flex: 2; padding: 0 12px"
           >
-            <path
-              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-            />
-          </svg>
-          X (Twitter) でシェア
-        </button>
+            <svg
+              style="width: 18px; height: 18px; fill: currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"
+              />
+            </svg>
+            タイッツーでシェア
+          </button>
+          <button
+            class="btn btn-secondary"
+            id="btn-copy"
+            style="flex: 1; padding: 0 12px"
+          >
+            <svg
+              style="width: 18px; height: 18px; fill: currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
+              />
+            </svg>
+            コピー
+          </button>
+        </div>
         <button class="btn btn-secondary" id="btn-result-home">
           トップに戻る
         </button>
@@ -607,6 +686,8 @@
         clicks: 0,
         path: [],
         dailyData: null, // { article }
+        startTime: 0,
+        clearTime: 0,
       };
 
       const UI = {
@@ -636,8 +717,39 @@
         result: {
           modeText: document.getElementById("result-mode-text"),
           clicksDisplay: document.getElementById("result-clicks-display"),
+          timeDisplay: document.getElementById("result-time-display"),
         },
       };
+
+      let toastTimeout;
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("クリップボードにコピーしました！");
+        } catch (err) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+            showToast("クリップボードにコピーしました！");
+          } catch (e) {
+            showToast("コピーに失敗しました");
+          }
+          document.body.removeChild(textarea);
+        }
+      }
 
       function showScreen(screenName) {
         Object.values(UI.screens).forEach((el) =>
@@ -697,8 +809,8 @@
 
       function updateTodayDailyUI(articleName) {
         UI.start.todayDailyArticle.textContent = articleName;
-        UI.start.btnDaily1.innerHTML = `デイリー (タイツ <span class="text-light">から</span> ${articleName})`;
-        UI.start.btnDaily2.innerHTML = `デイリー (${articleName} <span class="text-light">から</span> タイツ)`;
+        UI.start.btnDaily1.innerHTML = `タイツ <span class="text-light">から</span> ${articleName}`;
+        UI.start.btnDaily2.innerHTML = `${articleName} <span class="text-light">から</span> タイツ`;
       }
 
       function renderPastDailyList(pastList) {
@@ -741,6 +853,7 @@
           start: state.startArticle,
           target: state.targetArticle,
           clicks: state.clicks,
+          time: state.clearTime,
           mode: state.mode,
           path: state.path,
         });
@@ -785,16 +898,22 @@
           div.innerHTML = `
             <div class="list-item-header">
               <span>${item.date}</span>
-              <span style="color: var(--md-sys-color-primary); font-weight:700;">${item.clicks}手クリア</span>
+              <span style="color: var(--md-sys-color-primary); font-weight:700;">${item.clicks}手クリア (${item.time || 0}秒)</span>
             </div>
             <div class="list-item-title">
               ${item.start} <span class="text-light">から</span> ${item.target}
             </div>
             ${pathHtml}
-            <button class="btn btn-secondary btn-share-history" data-index="${index}" style="height: 32px; font-size: 12px; padding: 0 12px; margin-top: 8px; width: 100%;">
-              <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              シェア
-            </button>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary btn-share-history" data-index="${index}" style="flex: 2; height: 32px; font-size: 12px; padding: 0 12px;">
+                <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+                タイッツーでシェア
+              </button>
+              <button class="btn btn-secondary btn-copy-history" data-index="${index}" style="flex: 1; height: 32px; font-size: 12px; padding: 0 12px;">
+                <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                コピー
+              </button>
+            </div>
           `;
           UI.lists.localHistory.appendChild(div);
         });
@@ -803,20 +922,41 @@
         document.querySelectorAll(".btn-share-history").forEach((btn) => {
           btn.addEventListener("click", (e) => {
             const idx = e.currentTarget.getAttribute("data-index");
-            shareHistoryItem(idx);
+            shareHistoryItem(idx, false);
+          });
+        });
+        document.querySelectorAll(".btn-copy-history").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const idx = e.currentTarget.getAttribute("data-index");
+            shareHistoryItem(idx, true);
           });
         });
       }
 
-      function shareHistoryItem(index) {
+      function generateShareText(item) {
+        let modeName = "ウィキペディアゲーム";
+        if (item.mode.startsWith("daily") || item.mode === "past") {
+          modeName = "デイリーチャレンジ";
+        } else if (item.mode === "random") {
+          modeName = "エンドレスモード";
+        }
+
+        return `${modeName}を"${item.start}"から"${item.target}"でクリア！\nクリック回数：${item.clicks}回\nクリアタイム：${item.time || 0}秒\n#WikiRace`;
+      }
+
+      function shareHistoryItem(index, isCopy) {
         const history = JSON.parse(
           localStorage.getItem("wiki_racing_history") || "[]",
         );
         const item = history[index];
         if (item) {
-          const text = `ウィキペディアゲーム(${item.start}から${item.target})を${item.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
-          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-          window.open(url, "_blank");
+          const text = generateShareText(item);
+          if (isCopy) {
+            copyToClipboard(text);
+          } else {
+            const url = `https://taittsuu.com/share?text=${encodeURIComponent(text)}`;
+            window.open(url, "_blank");
+          }
         }
       }
 
@@ -826,6 +966,7 @@
         state.targetArticle = target;
         state.clicks = 0;
         state.path = [start];
+        state.startTime = Date.now();
 
         UI.game.targetTitle.textContent = target;
         UI.game.clickCount.textContent = "0";
@@ -902,9 +1043,13 @@
       }
 
       function handleWin() {
+        const elapsedMs = Date.now() - state.startTime;
+        state.clearTime = Math.floor(elapsedMs / 1000);
+
         saveToLocalHistory();
 
         UI.result.clicksDisplay.textContent = state.clicks;
+        UI.result.timeDisplay.textContent = state.clearTime;
         UI.result.modeText.innerHTML = `${state.startArticle} <span class="text-light">から</span> ${state.targetArticle}`;
 
         let pathHtml = `
@@ -926,6 +1071,25 @@
       }
 
       // Event Listeners for Start Screen Buttons
+      const btnToggleDaily = document.getElementById("btn-toggle-daily");
+      const dailyButtonsContainer = document.getElementById(
+        "daily-buttons-container",
+      );
+
+      btnToggleDaily.addEventListener("click", () => {
+        if (dailyButtonsContainer.style.display === "none") {
+          dailyButtonsContainer.style.display = "flex";
+          btnToggleDaily.style.backgroundColor =
+            "var(--md-sys-color-secondary-container)";
+          btnToggleDaily.style.color =
+            "var(--md-sys-color-on-secondary-container)";
+        } else {
+          dailyButtonsContainer.style.display = "none";
+          btnToggleDaily.style.backgroundColor = "var(--md-sys-color-primary)";
+          btnToggleDaily.style.color = "var(--md-sys-color-on-primary)";
+        }
+      });
+
       document.getElementById("btn-daily-1").addEventListener("click", () => {
         if (!state.dailyData) return;
         startGame("daily1", CONST_TIGHTS, state.dailyData.article);
@@ -962,11 +1126,16 @@
           showScreen("start");
         });
 
-      // Share Button
+      // Share Buttons
       document.getElementById("btn-share").addEventListener("click", () => {
-        const text = `ウィキペディアゲーム(${state.startArticle}から${state.targetArticle})を${state.clicks}手でクリアしました！\n#WikiRacing #Wikiホップ`;
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        const text = generateShareText(state);
+        const url = `https://taittsuu.com/share?text=${encodeURIComponent(text)}`;
         window.open(url, "_blank");
+      });
+
+      document.getElementById("btn-copy").addEventListener("click", () => {
+        const text = generateShareText(state);
+        copyToClipboard(text);
       });
 
       // Init
