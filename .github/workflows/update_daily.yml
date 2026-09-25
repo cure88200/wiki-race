@@ -2,7 +2,8 @@ name: Update Daily Wikipedia Game
 
 on:
   schedule:
-    - cron: "0 15 * * *" # 日本時間の午前0時
+    # 日本時間の午前2:30 (UTCの17:30) に実行
+    - cron: "30 17 * * *"
   workflow_dispatch:
 
 jobs:
