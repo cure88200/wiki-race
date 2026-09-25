@@ -2,22 +2,14 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Wikiホップ</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
       :root {
         --content-width: 440px;
-
         --md-sys-color-surface: #ffffff;
         --md-sys-color-surface-container: #f5f5f6;
         --md-sys-color-surface-container-high: #ececed;
@@ -31,1118 +23,460 @@
         --md-sys-color-error: #b00020;
         --md-sys-color-on-error: #ffffff;
         --shadow-color: rgba(0, 0, 0, 0.06);
-
         --md-shape-corner-small: 8px;
         --md-shape-corner-medium: 16px;
         --md-shape-corner-large: 28px;
         --md-shape-corner-full: 9999px;
       }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-        transition:
-          background-color 0.25s ease,
-          color 0.25s ease,
-          border-color 0.25s ease;
-      }
-
-      html,
-      body {
-        overscroll-behavior: none;
-        touch-action: manipulation;
-      }
-
-      body {
-        background-color: var(--md-sys-color-surface);
-        color: var(--md-sys-color-on-surface);
-        font-family: "Roboto", "Noto Sans JP", sans-serif;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 32px 16px;
-        padding-top: calc(32px + env(safe-area-inset-top));
-        padding-bottom: calc(32px + env(safe-area-inset-bottom));
-      }
-
-      .app-container {
-        background-color: var(--md-sys-color-surface-container);
-        border-radius: var(--md-shape-corner-large);
-        padding: 32px 24px;
-        max-width: 1200px;
-        width: 100%;
-        box-shadow: 0 10px 30px var(--shadow-color);
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .screen {
-        display: none;
-        flex-direction: column;
-        gap: 16px;
-        width: 100%;
-        animation: fadeIn 0.3s ease;
-      }
-      .screen.active {
-        display: flex;
-      }
-      .screen-narrow {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      h1,
-      h2 {
-        font-weight: 700;
-        color: var(--md-sys-color-on-surface);
-        text-align: center;
-        letter-spacing: -0.5px;
-      }
-      h1 {
-        font-size: 28px;
-        margin-bottom: 8px;
-      }
-      h2 {
-        font-size: 20px;
-      }
-
-      .subtitle {
-        text-align: center;
-        color: var(--md-sys-color-on-surface-variant);
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .btn {
-        height: 48px;
-        padding: 0 20px;
-        border-radius: var(--md-shape-corner-full);
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.1px;
-        cursor: pointer;
-        border: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-        gap: 8px;
-        width: 100%;
-      }
-      .btn:active {
-        transform: scale(0.98);
-      }
-
-      .btn-primary {
-        background-color: var(--md-sys-color-primary);
-        color: var(--md-sys-color-on-primary);
-      }
-      .btn-primary:hover {
-        box-shadow: 0 2px 6px var(--shadow-color);
-        filter: brightness(0.95);
-      }
-
-      .btn-secondary {
-        background-color: var(--md-sys-color-secondary-container);
-        color: var(--md-sys-color-on-secondary-container);
-      }
-      .btn-secondary:hover {
-        filter: brightness(0.96);
-      }
-
-      .btn-outline {
-        background-color: transparent;
-        color: var(--md-sys-color-on-surface);
-        border: 2px solid var(--md-sys-color-outline);
-      }
-
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .list-container {
-        background-color: var(--md-sys-color-surface-container-high);
-        border-radius: var(--md-shape-corner-medium);
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        max-height: 250px;
-        overflow-y: auto;
-      }
-
-      .list-item {
-        background-color: var(--md-sys-color-surface);
-        padding: 12px;
-        border-radius: var(--md-shape-corner-small);
-        border: 1px solid var(--md-sys-color-outline);
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .list-item-header {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        color: var(--md-sys-color-on-surface-variant);
-        font-weight: 500;
-      }
-
-      .list-item-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--md-sys-color-on-surface);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .empty-text {
-        text-align: center;
-        color: var(--md-sys-color-on-surface-variant);
-        font-size: 13px;
-        padding: 20px 0;
-      }
-
-      .game-header {
-        background-color: var(--md-sys-color-surface);
-        padding: 16px;
-        border-radius: var(--md-shape-corner-medium);
-        border: 1px solid var(--md-sys-color-outline);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
-      }
-
-      .target-info {
-        font-size: 15px;
-        font-weight: 700;
-        color: var(--md-sys-color-on-surface);
-      }
-
-      .clicks-badge {
-        display: inline-block;
-        background-color: var(--md-sys-color-primary);
-        color: var(--md-sys-color-on-primary);
-        padding: 4px 12px;
-        border-radius: var(--md-shape-corner-full);
-        font-size: 14px;
-        font-weight: 700;
-        margin-top: 4px;
-      }
-
-      .wiki-container {
-        background-color: var(--md-sys-color-surface);
-        border-radius: var(--md-shape-corner-medium);
-        border: 1px solid var(--md-sys-color-outline);
-        padding: 24px;
-        height: 70vh;
-        overflow-y: auto;
-        font-size: 16px;
-        line-height: 1.8;
-        color: var(--md-sys-color-on-surface);
-      }
-
-      /* Clean up Wikipedia HTML */
-      .wiki-container .infobox,
-      .wiki-container .navbox,
-      .wiki-container .mw-empty-elt,
-      .wiki-container .reference,
-      .wiki-container .reflist,
-      .wiki-container .mw-editsection,
-      .wiki-container .toc,
-      .wiki-container .noprint {
-        display: none !important;
-      }
-
-      .wiki-container h1,
-      .wiki-container h2,
-      .wiki-container h3 {
-        margin-top: 1em;
-        margin-bottom: 0.5em;
-        border-bottom: 1px solid var(--md-sys-color-outline);
-        padding-bottom: 4px;
-      }
-
-      .wiki-container a {
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 500;
-        border-bottom: 1px solid rgba(37, 99, 235, 0.3);
-      }
-      .wiki-container a.disabled {
-        color: var(--md-sys-color-on-surface-variant) !important;
-        pointer-events: none;
-        border-bottom: none;
-        text-decoration: line-through;
-      }
-
-      .result-box {
-        background-color: var(--md-sys-color-surface);
-        padding: 32px 16px;
-        border-radius: var(--md-shape-corner-medium);
-        border: 1px solid var(--md-sys-color-outline);
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .result-clicks {
-        font-size: 48px;
-        font-weight: 900;
-        color: var(--md-sys-color-primary);
-        line-height: 1;
-      }
-
-      .text-light {
-        color: var(--md-sys-color-on-surface-variant);
-        font-weight: 500;
-        font-size: 0.9em;
-        margin: 0 4px;
-      }
-
-      .path-details {
-        background-color: var(--md-sys-color-surface-container);
-        border-radius: var(--md-shape-corner-small);
-        border: 1px solid rgba(128, 128, 128, 0.12);
-        overflow: hidden;
-      }
-      .path-summary {
-        padding: 10px 12px;
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--md-sys-color-on-surface-variant);
-        cursor: pointer;
-        list-style: none;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        user-select: none;
-      }
-      .path-summary::-webkit-details-marker {
-        display: none;
-      }
-      .path-summary svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-        transition: transform 0.25s ease;
-      }
-      .path-details[open] .path-summary svg {
-        transform: rotate(180deg);
-      }
-      .path-content {
-        padding: 0 12px 12px 12px;
-        font-size: 13px;
-        color: var(--md-sys-color-on-surface);
-      }
-      .path-list {
-        padding-left: 24px;
-        margin: 0;
-        line-height: 1.6;
-      }
-      .path-list li {
-        margin-bottom: 4px;
-      }
-
-      .loading-overlay {
-        position: absolute;
-        inset: 0;
-        background-color: rgba(245, 245, 246, 0.9);
-        z-index: 100;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--md-shape-corner-large);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-      }
-      .loading-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid var(--md-sys-color-outline);
-        border-top-color: var(--md-sys-color-primary);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .toast {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        background-color: var(--md-sys-color-on-surface);
-        color: var(--md-sys-color-surface);
-        padding: 12px 24px;
-        border-radius: var(--md-shape-corner-full);
-        font-size: 14px;
-        font-weight: 700;
-        opacity: 0;
-        transition:
-          transform 0.3s ease,
-          opacity 0.3s ease;
-        z-index: 1000;
-        pointer-events: none;
-        white-space: nowrap;
-      }
-      .toast.show {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-
-      footer {
-        margin-top: 24px;
-        font-size: 12px;
-        color: var(--md-sys-color-on-surface-variant);
-        text-align: center;
-      }
-
-      /* フッターのリンク用スタイル */
-      footer a {
-        color: var(--md-sys-color-on-surface-variant);
-        text-decoration: none;
-        font-weight: 700;
-        transition: color 0.2s ease;
-      }
-      footer a:hover {
-        color: var(--md-sys-color-on-surface);
-        text-decoration: underline;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease; }
+      html, body { overscroll-behavior: none; touch-action: manipulation; }
+      body { background-color: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: "Roboto", "Noto Sans JP", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 16px; padding-top: calc(32px + env(safe-area-inset-top)); padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+      .app-container { background-color: var(--md-sys-color-surface-container); border-radius: var(--md-shape-corner-large); padding: 32px 24px; max-width: 1200px; width: 100%; box-shadow: 0 10px 30px var(--shadow-color); display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; }
+      .screen { display: none; flex-direction: column; gap: 16px; width: 100%; animation: fadeIn 0.3s ease; }
+      .screen.active { display: flex; }
+      .screen-narrow { max-width: 500px; margin: 0 auto; width: 100%; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      h1, h2 { font-weight: 700; color: var(--md-sys-color-on-surface); text-align: center; letter-spacing: -0.5px; }
+      h1 { font-size: 28px; margin-bottom: 8px; }
+      h2 { font-size: 18px; }
+      .subtitle { text-align: center; color: var(--md-sys-color-on-surface-variant); font-size: 14px; font-weight: 500; }
+      .btn { height: 48px; padding: 0 20px; border-radius: var(--md-shape-corner-full); font-size: 15px; font-weight: 700; letter-spacing: 0.1px; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; user-select: none; gap: 8px; width: 100%; }
+      .btn:active { transform: scale(0.98); }
+      .btn-primary { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+      .btn-primary:hover { box-shadow: 0 2px 6px var(--shadow-color); filter: brightness(0.95); }
+      .btn-secondary { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+      .btn-secondary:hover { filter: brightness(0.96); }
+      .btn-outline { background-color: transparent; color: var(--md-sys-color-on-surface); border: 2px solid var(--md-sys-color-outline); }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-icon-square { width: 36px; height: 36px; padding: 0; border-radius: var(--md-shape-corner-small); }
+      .btn-icon-square svg { width: 20px; height: 20px; fill: currentColor; }
+      .from-text-light { opacity: 0.6; font-size: 0.9em; margin: 0 4px; font-weight: 500; }
+      .week-nav { display: flex; align-items: center; justify-content: space-between; background-color: var(--md-sys-color-surface-container-high); border-radius: var(--md-shape-corner-small); padding: 8px; margin-bottom: 8px; }
+      .week-label { font-size: 14px; font-weight: 700; color: var(--md-sys-color-on-surface); user-select: none; }
+      .list-container { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+      .list-item { background-color: var(--md-sys-color-surface); padding: 12px; border-radius: var(--md-shape-corner-small); border: 1px solid var(--md-sys-color-outline); display: flex; flex-direction: column; gap: 4px; }
+      .list-item-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--md-sys-color-on-surface-variant); font-weight: 500; }
+      .list-item-title { font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); display: flex; align-items: center; }
+      .empty-text { text-align: center; color: var(--md-sys-color-on-surface-variant); font-size: 13px; padding: 20px 0; }
+      .game-header { background-color: var(--md-sys-color-surface); padding: 16px; border-radius: var(--md-shape-corner-medium); border: 1px solid var(--md-sys-color-outline); display: flex; flex-direction: column; gap: 8px; text-align: center; }
+      .target-info { font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); }
+      .clicks-badge { display: inline-block; background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); padding: 4px 12px; border-radius: var(--md-shape-corner-full); font-size: 14px; font-weight: 700; margin-top: 4px; }
+      .wiki-container { background-color: var(--md-sys-color-surface); border-radius: var(--md-shape-corner-medium); border: 1px solid var(--md-sys-color-outline); padding: 24px; height: 65vh; overflow-y: auto; font-size: 16px; line-height: 1.8; color: var(--md-sys-color-on-surface); }
+      .wiki-container .infobox, .wiki-container .navbox, .wiki-container .mw-empty-elt, .wiki-container .reference, .wiki-container .reflist, .wiki-container .mw-editsection, .wiki-container .toc, .wiki-container .noprint { display: none !important; }
+      .wiki-container h1, .wiki-container h2, .wiki-container h3 { margin-top: 1em; margin-bottom: 0.5em; border-bottom: 1px solid var(--md-sys-color-outline); padding-bottom: 4px; }
+      .wiki-container a { color: #2563eb; text-decoration: none; font-weight: 500; border-bottom: 1px solid rgba(37, 99, 235, 0.3); }
+      .wiki-container a.disabled { color: var(--md-sys-color-on-surface-variant) !important; pointer-events: none; border-bottom: none; text-decoration: line-through; }
+      .result-box { background-color: var(--md-sys-color-surface); padding: 32px 16px; border-radius: var(--md-shape-corner-medium); border: 1px solid var(--md-sys-color-outline); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+      .result-clicks { font-size: 48px; font-weight: 900; color: var(--md-sys-color-primary); line-height: 1; }
+      .path-details { background-color: var(--md-sys-color-surface-container); border-radius: var(--md-shape-corner-small); border: 1px solid rgba(128, 128, 128, 0.12); overflow: hidden; margin-top: 8px; width: 100%; text-align: left; }
+      .path-summary { padding: 10px 12px; font-size: 13px; font-weight: 700; color: var(--md-sys-color-on-surface-variant); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; }
+      .path-summary::-webkit-details-marker { display: none; }
+      .path-summary svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.25s ease; }
+      .path-details[open] .path-summary svg { transform: rotate(180deg); }
+      .path-content { padding: 0 12px 12px 12px; font-size: 13px; color: var(--md-sys-color-on-surface); }
+      .path-list { padding-left: 24px; margin: 0; line-height: 1.6; }
+      .path-list li { margin-bottom: 4px; }
+      .loading-overlay { position: absolute; inset: 0; background-color: rgba(245, 245, 246, 0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: var(--md-shape-corner-large); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+      .loading-overlay.active { opacity: 1; pointer-events: auto; }
+      .spinner { width: 40px; height: 40px; border: 4px solid var(--md-sys-color-outline); border-top-color: var(--md-sys-color-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--md-sys-color-on-surface); color: var(--md-sys-color-surface); padding: 12px 24px; border-radius: var(--md-shape-corner-full); font-size: 14px; font-weight: 700; opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; z-index: 1000; pointer-events: none; white-space: nowrap; }
+      .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+      .modal-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+      .modal-overlay.active { opacity: 1; pointer-events: auto; }
+      .modal-content { background-color: var(--md-sys-color-surface); padding: 24px; border-radius: var(--md-shape-corner-medium); width: 90%; max-width: 400px; box-shadow: 0 10px 30px var(--shadow-color); display: flex; flex-direction: column; gap: 16px; }
+      .modal-input { width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-shape-corner-small); font-size: 14px; background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface); font-family: inherit; }
+      .modal-input:focus { outline: 2px solid var(--md-sys-color-primary); outline-offset: -1px; }
+      footer { margin-top: 24px; font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-align: center; }
+      footer a { color: var(--md-sys-color-on-surface-variant); text-decoration: none; font-weight: 700; transition: color 0.2s ease; }
+      footer a:hover { color: var(--md-sys-color-on-surface); text-decoration: underline; }
     </style>
   </head>
   <body>
     <div class="app-container">
-      <!-- Loading Overlay -->
       <div id="loading" class="loading-overlay">
         <div class="spinner"></div>
-        <p
-          style="
-            margin-top: 16px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-          "
-        >
-          通信中...
-        </p>
+        <p style="margin-top: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);">通信中...</p>
       </div>
 
-      <!-- Toast -->
       <div id="toast" class="toast"></div>
 
-      <!-- Start Screen -->
       <div id="screen-start" class="screen screen-narrow active">
-        <h1></h1>
-        <p class="subtitle"></p>
-
-        <div style="text-align: center; margin-bottom: 8px">
-          <div
-            style="
-              font-size: 14px;
-              color: var(--md-sys-color-on-surface-variant);
-              font-weight: 700;
-            "
-          >
-            今日のデイリー記事
-          </div>
-          <div
-            id="today-daily-article-display"
-            style="
-              font-size: 24px;
-              font-weight: 900;
-              color: var(--md-sys-color-on-surface);
-              margin-top: 4px;
-            "
-          >
-            -
-          </div>
+        <div style="text-align: center; margin-bottom: 8px;">
+          <div id="daily-date-label" style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">-</div>
+          <div id="today-daily-article-display" style="font-size: 26px; font-weight: 900; color: var(--md-sys-color-on-surface); margin-top: 4px;">-</div>
         </div>
 
-        <button class="btn btn-primary" id="btn-toggle-daily">
-          デイリーチャレンジ
-        </button>
-        <div
-          id="daily-buttons-container"
-          style="
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            margin: 0 16px;
-          "
-        >
-          <button class="btn btn-secondary" id="btn-daily-1">
-            タイツ から 〇〇
+        <button class="btn btn-primary" id="btn-toggle-daily">デイリーチャレンジ</button>
+        <div id="daily-buttons-container" style="display: none; flex-direction: column; gap: 8px;">
+          <button class="btn btn-primary" id="btn-daily-1">-</button>
+          <button class="btn btn-primary" id="btn-daily-2">-</button>
+        </div>
+        <button class="btn btn-primary" id="btn-random">エンドレスモード</button>
+
+        <div style="height: 16px;"></div>
+        
+        <h2 style="text-align: left;">過去のデイリー問題</h2>
+        <div class="week-nav">
+          <button class="btn btn-secondary btn-icon-square" id="btn-past-prev">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
           </button>
-          <button class="btn btn-secondary" id="btn-daily-2">
-            〇〇 から タイツ
+          <span class="week-label" id="label-past-week">-</span>
+          <button class="btn btn-secondary btn-icon-square" id="btn-past-next">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
           </button>
         </div>
-        <button class="btn btn-primary" id="btn-random">
-          エンドレスモード
-        </button>
+        <div class="list-container" id="past-daily-list"><div class="empty-text">読み込み中...</div></div>
 
-        <div style="height: 16px"></div>
-
-        <h2 style="font-size: 16px; text-align: left">過去のデイリー問題</h2>
-        <div class="list-container" id="past-daily-list">
-          <div class="empty-text">読み込み中...</div>
+        <h2 style="text-align: left; margin-top: 8px;">あなたのプレイ履歴</h2>
+        <div class="week-nav">
+          <button class="btn btn-secondary btn-icon-square" id="btn-hist-prev">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+          </button>
+          <span class="week-label" id="label-hist-week">-</span>
+          <button class="btn btn-secondary btn-icon-square" id="btn-hist-next">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+          </button>
         </div>
-
-        <h2 style="font-size: 16px; text-align: left; margin-top: 8px">
-          あなたのプレイ履歴
-        </h2>
-        <div class="list-container" id="local-history-list">
-          <div class="empty-text">まだ履歴がありません</div>
-        </div>
+        <div class="list-container" id="local-history-list"><div class="empty-text">まだ履歴がありません</div></div>
       </div>
 
-      <!-- Game Screen -->
       <div id="screen-game" class="screen">
         <div class="game-header">
-          <div
-            style="
-              font-size: 12px;
-              color: var(--md-sys-color-on-surface-variant);
-              font-weight: 700;
-            "
-          >
-            現在地
-          </div>
-          <div
-            id="current-article-title"
-            style="font-size: 20px; font-weight: 900"
-          >
-            -
-          </div>
-
-          <div
-            style="
-              margin: 8px 0;
-              border-top: 1px dashed var(--md-sys-color-outline);
-            "
-          ></div>
-
-          <div class="target-info">
-            🏁 ゴール: <span id="target-article-title"></span>
-          </div>
+          <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">現在地</div>
+          <div id="current-article-title" style="font-size: 20px; font-weight: 900;">-</div>
+          <div style="margin: 8px 0; border-top: 1px dashed var(--md-sys-color-outline);"></div>
+          <div class="target-info">🏁 ゴール: <span id="target-article-title"></span></div>
           <div>
-            <span class="clicks-badge"
-              >クリック数: <span id="click-count">0</span></span
-            >
+            <span class="clicks-badge">クリック数: <span id="click-count">0</span></span>
+            <span class="clicks-badge" style="margin-left: 8px;">タイム: <span id="time-count">0</span>秒</span>
           </div>
         </div>
-
-        <div class="wiki-container" id="wiki-content">
-          <!-- Wikipedia HTML injected here -->
-        </div>
-
-        <button class="btn btn-outline" id="btn-retire">
-          リタイア (トップに戻る)
-        </button>
+        <div class="wiki-container" id="wiki-content"></div>
+        <button class="btn btn-outline" id="btn-retire">リタイア (トップに戻る)</button>
       </div>
 
-      <!-- Result Screen -->
       <div id="screen-result" class="screen screen-narrow">
         <div class="result-box">
-          <h1 style="margin: 0; font-size: 32px">GOAL!🎉</h1>
-          <p class="subtitle" id="result-mode-text">デイリーモードクリア！</p>
-
-          <div
-            style="
-              display: flex;
-              gap: 32px;
-              justify-content: center;
-              width: 100%;
-              margin-top: 8px;
-            "
-          >
-            <div style="text-align: center">
-              <div
-                style="
-                  font-size: 14px;
-                  color: var(--md-sys-color-on-surface-variant);
-                  font-weight: 700;
-                "
-              >
-                クリア手番
-              </div>
-              <div class="result-clicks">
-                <span id="result-clicks-display">0</span
-                ><span style="font-size: 20px; margin-left: 2px">回</span>
-              </div>
+          <h1 style="margin: 0; font-size: 32px;">GOAL!🎉</h1>
+          <p class="subtitle" id="result-mode-text"></p>
+          <div style="display: flex; gap: 32px; justify-content: center; width: 100%; margin-top: 8px;">
+            <div style="text-align: center;">
+              <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">クリック回数</div>
+              <div class="result-clicks"><span id="result-clicks-display">0</span><span style="font-size: 20px; margin-left: 2px;">回</span></div>
             </div>
-            <div style="text-align: center">
-              <div
-                style="
-                  font-size: 14px;
-                  color: var(--md-sys-color-on-surface-variant);
-                  font-weight: 700;
-                "
-              >
-                クリアタイム
-              </div>
-              <div class="result-clicks">
-                <span id="result-time-display">0</span
-                ><span style="font-size: 20px; margin-left: 2px">秒</span>
-              </div>
+            <div style="text-align: center;">
+              <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); font-weight: 700;">クリアタイム</div>
+              <div class="result-clicks"><span id="result-time-display">0</span><span style="font-size: 20px; margin-left: 2px;">秒</span></div>
             </div>
           </div>
-
-          <div
-            id="result-path-container"
-            style="width: 100%; text-align: left; margin-top: 8px"
-          ></div>
+          <div id="result-path-container" style="width: 100%;"></div>
         </div>
-
-        <div style="display: flex; gap: 8px; width: 100%">
-          <button
-            class="btn btn-primary"
-            id="btn-share"
-            style="flex: 2; padding: 0 12px"
-          >
-            <svg
-              style="width: 18px; height: 18px; fill: currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"
-              />
-            </svg>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button class="btn btn-primary" id="btn-share" style="flex: 2; padding: 0 12px;">
+            <svg style="width: 18px; height: 18px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
             タイッツーでシェア
           </button>
-          <button
-            class="btn btn-secondary"
-            id="btn-copy"
-            style="flex: 1; padding: 0 12px"
-          >
-            <svg
-              style="width: 18px; height: 18px; fill: currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
-              />
-            </svg>
+          <button class="btn btn-secondary" id="btn-copy" style="flex: 1; padding: 0 12px;">
+            <svg style="width: 18px; height: 18px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             コピー
           </button>
         </div>
-        <button class="btn btn-secondary" id="btn-result-home">
-          トップに戻る
-        </button>
+        <button class="btn btn-secondary" id="btn-result-home">トップに戻る</button>
+      </div>
+
+      <div id="endless-modal" class="modal-overlay">
+        <div class="modal-content">
+          <h2 style="text-align: left; margin: 0;">エンドレスモード設定</h2>
+          <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin: 0 0 8px 0;">空欄の場合はランダムな記事が選ばれます。</p>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--md-sys-color-on-surface-variant);">スタート記事 (任意)</label>
+            <input type="text" id="endless-start-input" class="modal-input" placeholder="例: 徳川家康" />
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--md-sys-color-on-surface-variant);">ゴール記事 (任意)</label>
+            <input type="text" id="endless-target-input" class="modal-input" placeholder="例: 夏目漱石" />
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button class="btn btn-secondary" id="btn-modal-cancel" style="flex: 1;">キャンセル</button>
+            <button class="btn btn-primary" id="btn-modal-start" style="flex: 1;">ゲーム開始</button>
+          </div>
+        </div>
       </div>
     </div>
-
+    
     <footer>
-      <a href="https://x.com/cure88200" target="_blank" rel="noopener"
-        >cure88200</a
-      >
-      -
-      <span style="font-family: monospace; font-size: 11px"
-        >__BUILD_VERSION__</span
-      >
+      <a href="https://x.com/cure88200" target="_blank" rel="noopener">cure88200</a> - <span style="font-family: monospace; font-size: 11px;">__BUILD_VERSION__</span>
     </footer>
 
     <script>
       const API_BASE = "https://ja.wikipedia.org/w/api.php";
       const CONST_TIGHTS = "タイツ";
-
-      let state = {
-        mode: "", // 'daily1', 'daily2', 'random', 'past'
-        startArticle: "",
-        targetArticle: "",
-        currentArticle: "",
-        clicks: 0,
-        path: [],
-        dailyData: null, // { article }
-        startTime: 0,
-        clearTime: 0,
-      };
+      
+      let state = { mode: "", startArticle: "", targetArticle: "", currentArticle: "", clicks: 0, path: [], startTime: 0, clearTime: 0, timerInterval: null };
+      let pastDailyData = [];
+      let pastDailyGroups = [];
+      let pastDailyIdx = 0;
+      let historyData = [];
+      let historyGroups = [];
+      let historyIdx = 0;
 
       const UI = {
-        screens: {
-          start: document.getElementById("screen-start"),
-          game: document.getElementById("screen-game"),
-          result: document.getElementById("screen-result"),
-        },
-        loading: document.getElementById("loading"),
-        lists: {
-          pastDaily: document.getElementById("past-daily-list"),
-          localHistory: document.getElementById("local-history-list"),
-        },
+        screens: { start: document.getElementById('screen-start'), game: document.getElementById('screen-game'), result: document.getElementById('screen-result') },
+        loading: document.getElementById('loading'),
         start: {
-          todayDailyArticle: document.getElementById(
-            "today-daily-article-display",
-          ),
-          btnDaily1: document.getElementById("btn-daily-1"),
-          btnDaily2: document.getElementById("btn-daily-2"),
+          dailyDateLabel: document.getElementById('daily-date-label'),
+          todayDailyArticle: document.getElementById('today-daily-article-display'),
+          btnDaily1: document.getElementById('btn-daily-1'),
+          btnDaily2: document.getElementById('btn-daily-2'),
+          btnToggleDaily: document.getElementById('btn-toggle-daily'),
+          dailyButtonsContainer: document.getElementById('daily-buttons-container')
         },
-        game: {
-          currentTitle: document.getElementById("current-article-title"),
-          targetTitle: document.getElementById("target-article-title"),
-          clickCount: document.getElementById("click-count"),
-          content: document.getElementById("wiki-content"),
-        },
-        result: {
-          modeText: document.getElementById("result-mode-text"),
-          clicksDisplay: document.getElementById("result-clicks-display"),
-          timeDisplay: document.getElementById("result-time-display"),
-        },
+        past: { label: document.getElementById('label-past-week'), prev: document.getElementById('btn-past-prev'), next: document.getElementById('btn-past-next'), list: document.getElementById('past-daily-list') },
+        hist: { label: document.getElementById('label-hist-week'), prev: document.getElementById('btn-hist-prev'), next: document.getElementById('btn-hist-next'), list: document.getElementById('local-history-list') },
+        game: { currentTitle: document.getElementById('current-article-title'), targetTitle: document.getElementById('target-article-title'), clickCount: document.getElementById('click-count'), timeCount: document.getElementById('time-count'), content: document.getElementById('wiki-content') },
+        result: { modeText: document.getElementById('result-mode-text'), clicksDisplay: document.getElementById('result-clicks-display'), timeDisplay: document.getElementById('result-time-display'), pathContainer: document.getElementById('result-path-container') },
+        modal: { overlay: document.getElementById('endless-modal'), startInput: document.getElementById('endless-start-input'), targetInput: document.getElementById('endless-target-input'), btnCancel: document.getElementById('btn-modal-cancel'), btnStart: document.getElementById('btn-modal-start') }
       };
 
       let toastTimeout;
-      function showToast(message) {
-        const toast = document.getElementById("toast");
-        toast.textContent = message;
-        toast.classList.add("show");
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
         clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-          toast.classList.remove("show");
-        }, 3000);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
       }
 
       async function copyToClipboard(text) {
-        try {
-          await navigator.clipboard.writeText(text);
-          showToast("クリップボードにコピーしました！");
-        } catch (err) {
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          document.body.appendChild(textarea);
-          textarea.select();
-          try {
-            document.execCommand("copy");
-            showToast("クリップボードにコピーしました！");
-          } catch (e) {
-            showToast("コピーに失敗しました");
-          }
-          document.body.removeChild(textarea);
+        try { await navigator.clipboard.writeText(text); showToast('クリップボードにコピーしました！'); }
+        catch (err) {
+          const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('クリップボードにコピーしました！'); } catch(e) { showToast('コピーに失敗しました'); }
+          document.body.removeChild(ta);
         }
       }
 
-      function showScreen(screenName) {
-        Object.values(UI.screens).forEach((el) =>
-          el.classList.remove("active"),
-        );
-        UI.screens[screenName].classList.add("active");
+      function showScreen(name) { Object.values(UI.screens).forEach(el => el.classList.remove('active')); UI.screens[name].classList.add('active'); }
+      function showLoading(show) { UI.loading.classList.toggle('active', show); }
+      function getWeekGroupKey(dateStr) {
+        const d = new Date(dateStr.split(' ')[0] || dateStr);
+        if (isNaN(d.getTime())) return "unknown";
+        const day = d.getDay();
+        const diff = d.getDate() - day;
+        const sun = new Date(d.setDate(diff));
+        return `${sun.getFullYear()}-${sun.getMonth()+1}-${sun.getDate()}`;
+      }
+      function groupDataByWeek(items) {
+        const groups = {};
+        items.forEach((item, originalIdx) => {
+          item._oIdx = originalIdx;
+          const k = getWeekGroupKey(item.date);
+          if (k === "unknown") return;
+          if (!groups[k]) {
+            const d = new Date(item.date.split(' ')[0] || item.date);
+            const sun = new Date(d); sun.setDate(d.getDate() - d.getDay());
+            const sat = new Date(sun); sat.setDate(sun.getDate() + 6);
+            groups[k] = { key: k, start: sun, end: sat, items: [] };
+          }
+          groups[k].items.push(item);
+        });
+        return Object.values(groups).sort((a,b) => b.start.getTime() - a.start.getTime());
+      }
+      function formatMD(d) { return `${d.getMonth()+1}/${d.getDate()}`; }
+
+      function renderPastDaily() {
+        if (pastDailyGroups.length === 0) {
+          UI.past.label.textContent = "-"; UI.past.list.innerHTML = '<div class="empty-text">過去のデータがありません</div>';
+          UI.past.prev.disabled = true; UI.past.next.disabled = true; return;
+        }
+        UI.past.prev.disabled = (pastDailyIdx >= pastDailyGroups.length - 1);
+        UI.past.next.disabled = (pastDailyIdx <= 0);
+        const g = pastDailyGroups[pastDailyIdx];
+        UI.past.label.textContent = `${formatMD(g.start)} 〜 ${formatMD(g.end)}`;
+        UI.past.list.innerHTML = '';
+        g.items.forEach(item => {
+          const div = document.createElement('div'); div.className = 'list-item';
+          div.innerHTML = `
+            <div class="list-item-header"><span>${item.date}</span></div>
+            <div class="list-item-title">${item.article}</div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary" style="height:36px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${CONST_TIGHTS}', '${item.article}')">
+                タイツ <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${item.article}
+              </button>
+              <button class="btn btn-secondary" style="height:36px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${item.article}', '${CONST_TIGHTS}')">
+                ${item.article} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> タイツ
+              </button>
+            </div>`;
+          UI.past.list.appendChild(div);
+        });
       }
 
-      function showLoading(show) {
-        if (show) UI.loading.classList.add("active");
-        else UI.loading.classList.remove("active");
+      function renderHistory() {
+        if (historyGroups.length === 0) {
+          UI.hist.label.textContent = "-"; UI.hist.list.innerHTML = '<div class="empty-text">まだ履歴がありません</div>';
+          UI.hist.prev.disabled = true; UI.hist.next.disabled = true; return;
+        }
+        UI.hist.prev.disabled = (historyIdx >= historyGroups.length - 1);
+        UI.hist.next.disabled = (historyIdx <= 0);
+        const g = historyGroups[historyIdx];
+        UI.hist.label.textContent = `${formatMD(g.start)} 〜 ${formatMD(g.end)}`;
+        UI.hist.list.innerHTML = '';
+        g.items.forEach(item => {
+          const div = document.createElement('div'); div.className = 'list-item';
+          const pArr = item.path || [];
+          let pHtml = pArr.length > 0 ? `
+            <details class="path-details">
+              <summary class="path-summary"><span>経路を見る</span><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></summary>
+              <div class="path-content"><ol class="path-list">${pArr.map(p => `<li>${p}</li>`).join('')}</ol></div>
+            </details>` : '';
+          div.innerHTML = `
+            <div class="list-item-header"><span>${item.date}</span><span style="color:var(--md-sys-color-primary); font-weight:700;">${item.clicks}手 (${item.time||0}秒)</span></div>
+            <div class="list-item-title">${item.start} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${item.target}</div>
+            ${pHtml}
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary btn-share-hist" data-idx="${item._oIdx}" style="flex: 2; height: 32px; font-size: 12px; padding: 0 12px;">
+                <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>タイッツー
+              </button>
+              <button class="btn btn-secondary btn-copy-hist" data-idx="${item._oIdx}" style="flex: 1; height: 32px; font-size: 12px; padding: 0 12px;">
+                <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>コピー
+              </button>
+            </div>`;
+          UI.hist.list.appendChild(div);
+        });
+        document.querySelectorAll('.btn-share-hist').forEach(b => b.addEventListener('click', e => shareHist(e.currentTarget.dataset.idx, false)));
+        document.querySelectorAll('.btn-copy-hist').forEach(b => b.addEventListener('click', e => shareHist(e.currentTarget.dataset.idx, true)));
       }
 
-      async function fetchWikiRandom() {
-        const url = `${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=2&format=json&origin=*`;
-        const res = await fetch(url);
-        const data = await res.json();
-        return data.query.random.map((r) => r.title);
-      }
+      UI.past.prev.addEventListener('click', () => { if(pastDailyIdx < pastDailyGroups.length - 1) { pastDailyIdx++; renderPastDaily(); }});
+      UI.past.next.addEventListener('click', () => { if(pastDailyIdx > 0) { pastDailyIdx--; renderPastDaily(); }});
+      UI.hist.prev.addEventListener('click', () => { if(historyIdx < historyGroups.length - 1) { historyIdx++; renderHistory(); }});
+      UI.hist.next.addEventListener('click', () => { if(historyIdx > 0) { historyIdx--; renderHistory(); }});
 
       async function loadDailyJson() {
         try {
-          const res = await fetch("./daily_history.json");
-          if (!res.ok) throw new Error("File not found");
-          const history = await res.json();
-
-          if (history && history.length > 0) {
-            state.dailyData = history[0]; // Latest is today's
-            updateTodayDailyUI(state.dailyData.article);
-            renderPastDailyList(history.slice(1)); // Rest are past
-          } else {
-            throw new Error("Empty array");
+          const res = await fetch('./daily_history.json');
+          if(!res.ok) throw new Error();
+          const d = await res.json();
+          if(d && d.length > 0) {
+            const todayD = new Date();
+            UI.start.dailyDateLabel.textContent = `${todayD.getMonth() + 1}月${todayD.getDate()}日のデイリー記事`;
+            UI.start.todayDailyArticle.textContent = d[0].article;
+            UI.start.btnDaily1.innerHTML = `タイツ <span class="from-text-light">から</span> ${d[0].article}`;
+            UI.start.btnDaily2.innerHTML = `${d[0].article} <span class="from-text-light">から</span> タイツ`;
+            
+            UI.start.btnDaily1.onclick = () => startGame('daily1', CONST_TIGHTS, d[0].article);
+            UI.start.btnDaily2.onclick = () => startGame('daily2', d[0].article, CONST_TIGHTS);
+            
+            pastDailyGroups = groupDataByWeek(d.slice(1));
+            pastDailyIdx = 0; renderPastDaily();
           }
-        } catch (e) {
-          console.warn("Could not load daily_history.json. Using fallback.");
-          // Fallback if file doesn't exist yet (e.g. before Action runs)
-          UI.lists.pastDaily.innerHTML =
-            '<div class="empty-text">過去のデータがありません</div>';
-
-          // Generate a deterministic fallback based on today's date
-          const dateStr = new Date().toLocaleDateString("ja-JP");
-          const fallbackPool = [
-            "日本",
-            "宇宙",
-            "徳川家康",
-            "インターネット",
-            "寿司",
-            "富士山",
-          ];
-          const seed = dateStr.length; // Simple mock seed
-          state.dailyData = {
-            article: fallbackPool[seed % fallbackPool.length],
-          };
-          updateTodayDailyUI(state.dailyData.article);
+        } catch(e) {
+          UI.past.list.innerHTML = '<div class="empty-text">データがありません</div>';
         }
       }
 
-      function updateTodayDailyUI(articleName) {
-        UI.start.todayDailyArticle.textContent = articleName;
-        UI.start.btnDaily1.innerHTML = `タイツ <span class="text-light">から</span> ${articleName}`;
-        UI.start.btnDaily2.innerHTML = `${articleName} <span class="text-light">から</span> タイツ`;
+      function loadLocalHistory() {
+        historyData = JSON.parse(localStorage.getItem('wiki_racing_history') || '[]');
+        historyGroups = groupDataByWeek(historyData);
+        historyIdx = 0; renderHistory();
       }
 
-      function renderPastDailyList(pastList) {
-        if (pastList.length === 0) {
-          UI.lists.pastDaily.innerHTML =
-            '<div class="empty-text">過去のデータがありません</div>';
-          return;
-        }
-
-        UI.lists.pastDaily.innerHTML = "";
-        pastList.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "list-item";
-          div.innerHTML = `
-            <div class="list-item-header">
-              <span>${item.date}</span>
-            </div>
-            <div class="list-item-title">
-              <span style="font-size: 16px;">${item.article}</span>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${CONST_TIGHTS}', '${item.article}')">
-                タイツ <span class="text-light">から</span> ${item.article}
-              </button>
-              <button class="btn btn-secondary" style="height:32px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${item.article}', '${CONST_TIGHTS}')">
-                ${item.article} <span class="text-light">から</span> タイツ
-              </button>
-            </div>
-          `;
-          UI.lists.pastDaily.appendChild(div);
-        });
+      function saveHist() {
+        historyData.unshift({ date: new Date().toLocaleString('ja-JP'), start: state.startArticle, target: state.targetArticle, clicks: state.clicks, time: state.clearTime, mode: state.mode, path: state.path });
+        if(historyData.length > 100) historyData = historyData.slice(0, 100);
+        localStorage.setItem('wiki_racing_history', JSON.stringify(historyData));
+        loadLocalHistory();
       }
 
-      function saveToLocalHistory() {
-        let history = JSON.parse(
-          localStorage.getItem("wiki_racing_history") || "[]",
-        );
-        history.unshift({
-          date: new Date().toLocaleString("ja-JP"),
-          start: state.startArticle,
-          target: state.targetArticle,
-          clicks: state.clicks,
-          time: state.clearTime,
-          mode: state.mode,
-          path: state.path,
-        });
-        if (history.length > 20) history = history.slice(0, 20);
-        localStorage.setItem("wiki_racing_history", JSON.stringify(history));
-        renderLocalHistory();
+      function genText(item) {
+        const m = (item.mode.startsWith('daily') || item.mode==='past') ? "デイリーチャレンジ" : "エンドレスモード";
+        return `${m}を"${item.start}"から"${item.target}"でクリア！\nクリック回数：${item.clicks}回\nクリアタイム：${item.time||0}秒\n#WikiRace`;
+      }
+      function shareHist(idx, isCopy) {
+        const i = historyData[idx];
+        if(!i) return;
+        const txt = genText(i);
+        if(isCopy) copyToClipboard(txt);
+        else window.open(`https://taittsuu.com/share?text=${encodeURIComponent(txt)}`, '_blank');
       }
 
-      function renderLocalHistory() {
-        const history = JSON.parse(
-          localStorage.getItem("wiki_racing_history") || "[]",
-        );
-        if (history.length === 0) {
-          UI.lists.localHistory.innerHTML =
-            '<div class="empty-text">まだ履歴がありません</div>';
-          return;
-        }
-
-        UI.lists.localHistory.innerHTML = "";
-        history.forEach((item, index) => {
-          const div = document.createElement("div");
-          div.className = "list-item";
-
-          const pathArr = item.path || [];
-          let pathHtml = "";
-          if (pathArr.length > 0) {
-            pathHtml = `
-              <details class="path-details" style="margin-top: 8px;">
-                <summary class="path-summary">
-                  <span>経路を見る</span>
-                  <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-                </summary>
-                <div class="path-content">
-                  <ol class="path-list">
-                    ${pathArr.map((p) => `<li>${p}</li>`).join("")}
-                  </ol>
-                </div>
-              </details>
-            `;
-          }
-
-          div.innerHTML = `
-            <div class="list-item-header">
-              <span>${item.date}</span>
-              <span style="color: var(--md-sys-color-primary); font-weight:700;">${item.clicks}手クリア (${item.time || 0}秒)</span>
-            </div>
-            <div class="list-item-title">
-              ${item.start} <span class="text-light">から</span> ${item.target}
-            </div>
-            ${pathHtml}
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-secondary btn-share-history" data-index="${index}" style="flex: 2; height: 32px; font-size: 12px; padding: 0 12px;">
-                <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
-                タイッツーでシェア
-              </button>
-              <button class="btn btn-secondary btn-copy-history" data-index="${index}" style="flex: 1; height: 32px; font-size: 12px; padding: 0 12px;">
-                <svg style="width: 14px; height: 14px; fill: currentColor; margin-right: 4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                コピー
-              </button>
-            </div>
-          `;
-          UI.lists.localHistory.appendChild(div);
-        });
-
-        // シェアボタンのイベントリスナー追加
-        document.querySelectorAll(".btn-share-history").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            const idx = e.currentTarget.getAttribute("data-index");
-            shareHistoryItem(idx, false);
-          });
-        });
-        document.querySelectorAll(".btn-copy-history").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            const idx = e.currentTarget.getAttribute("data-index");
-            shareHistoryItem(idx, true);
-          });
-        });
-      }
-
-      function generateShareText(item) {
-        let modeName = "ウィキペディアゲーム";
-        if (item.mode.startsWith("daily") || item.mode === "past") {
-          modeName = "デイリーチャレンジ";
-        } else if (item.mode === "random") {
-          modeName = "エンドレスモード";
-        }
-
-        return `${modeName}を"${item.start}"から"${item.target}"でクリア！\nクリック回数：${item.clicks}回\nクリアタイム：${item.time || 0}秒\n#WikiRace`;
-      }
-
-      function shareHistoryItem(index, isCopy) {
-        const history = JSON.parse(
-          localStorage.getItem("wiki_racing_history") || "[]",
-        );
-        const item = history[index];
-        if (item) {
-          const text = generateShareText(item);
-          if (isCopy) {
-            copyToClipboard(text);
-          } else {
-            const url = `https://taittsuu.com/share?text=${encodeURIComponent(text)}`;
-            window.open(url, "_blank");
-          }
-        }
+      async function fetchRand(num) {
+        const res = await fetch(`${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=${num}&format=json&origin=*`);
+        const data = await res.json();
+        return data.query.random.map(r => r.title);
       }
 
       async function startGame(mode, start, target) {
-        state.mode = mode;
-        state.startArticle = start;
-        state.targetArticle = target;
-        state.clicks = 0;
-        state.path = [start];
-        state.startTime = Date.now();
-
-        UI.game.targetTitle.textContent = target;
-        UI.game.clickCount.textContent = "0";
-        UI.game.content.innerHTML = "";
-
-        showScreen("game");
-        await loadArticle(start);
+        state = { ...state, mode, startArticle: start, targetArticle: target, clicks: 0, path: [start], startTime: Date.now() };
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        UI.game.timeCount.textContent = '0';
+        state.timerInterval = setInterval(() => { UI.game.timeCount.textContent = Math.floor((Date.now() - state.startTime) / 1000); }, 1000);
+        UI.game.targetTitle.textContent = target; UI.game.clickCount.textContent = '0'; UI.game.content.innerHTML = '';
+        showScreen('game'); await loadArticle(start);
       }
 
       async function loadArticle(title) {
-        showLoading(true);
-        UI.game.content.scrollTop = 0;
-
+        showLoading(true); UI.game.content.scrollTop = 0;
         try {
-          const url = `${API_BASE}?action=parse&prop=text&format=json&origin=*&page=${encodeURIComponent(title)}&redirects=1`;
-          const res = await fetch(url);
+          const res = await fetch(`${API_BASE}?action=parse&prop=text&format=json&origin=*&page=${encodeURIComponent(title)}&redirects=1`);
           const data = await res.json();
-
-          if (data.error) throw new Error(data.error.info);
-
+          if(data.error) throw new Error();
           state.currentArticle = data.parse.title;
           UI.game.currentTitle.textContent = state.currentArticle;
-          UI.game.content.innerHTML = data.parse.text["*"];
-
-          interceptLinks();
-
-          // Check Win
-          if (state.currentArticle === state.targetArticle) {
-            handleWin();
-          }
-        } catch (e) {
-          console.error(e);
-          UI.game.content.innerHTML =
-            '<div style="color:var(--md-sys-color-error); font-weight:700; text-align:center; padding: 20px;">記事の読み込みに失敗しました。</div>';
-        } finally {
-          showLoading(false);
-        }
-      }
-
-      function interceptLinks() {
-        const links = UI.game.content.querySelectorAll("a");
-        links.forEach((link) => {
-          const href = link.getAttribute("href");
-
-          if (href && (href.startsWith("/wiki/") || href.startsWith("./"))) {
-            // Internal Wiki Link
-            const titlePart = href.startsWith("./")
-              ? href.substring(2)
-              : href.substring(6);
-            const decodedTitle = decodeURIComponent(titlePart.split("#")[0]);
-
-            // Disable special namespaces (e.g., File:, Wikipedia:)
-            if (titlePart.includes(":") && !titlePart.startsWith("Category:")) {
-              link.classList.add("disabled");
-              link.addEventListener("click", (e) => e.preventDefault());
-              return;
-            }
-
-            link.addEventListener("click", (e) => {
-              e.preventDefault();
-              if (decodedTitle) {
-                state.clicks++;
-                state.path.push(decodedTitle);
-                UI.game.clickCount.textContent = state.clicks;
-                loadArticle(decodedTitle);
-              }
-            });
-          } else {
-            // External or invalid link
-            link.classList.add("disabled");
-            link.addEventListener("click", (e) => e.preventDefault());
-          }
-        });
+          UI.game.content.innerHTML = data.parse.text['*'];
+          
+          UI.game.content.querySelectorAll('a').forEach(l => {
+            const h = l.getAttribute('href');
+            if (h && (h.startsWith('/wiki/') || h.startsWith('./'))) {
+              const tPart = h.startsWith('./') ? h.substring(2) : h.substring(6);
+              const dTitle = decodeURIComponent(tPart.split('#')[0]);
+              if(tPart.includes(':') && !tPart.startsWith('Category:')) { l.classList.add('disabled'); l.onclick = e=>e.preventDefault(); return; }
+              l.onclick = e => { e.preventDefault(); if(dTitle) { state.clicks++; state.path.push(dTitle); UI.game.clickCount.textContent = state.clicks; loadArticle(dTitle); }};
+            } else { l.classList.add('disabled'); l.onclick = e=>e.preventDefault(); }
+          });
+          if(state.currentArticle === state.targetArticle) handleWin();
+        } catch(e) { UI.game.content.innerHTML = '<div style="color:var(--md-sys-color-error); font-weight:700; text-align:center; padding: 20px;">読込失敗</div>'; }
+        finally { showLoading(false); }
       }
 
       function handleWin() {
-        const elapsedMs = Date.now() - state.startTime;
-        state.clearTime = Math.floor(elapsedMs / 1000);
-
-        saveToLocalHistory();
-
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.clearTime = Math.floor((Date.now() - state.startTime) / 1000);
+        saveHist();
         UI.result.clicksDisplay.textContent = state.clicks;
         UI.result.timeDisplay.textContent = state.clearTime;
-        UI.result.modeText.innerHTML = `${state.startArticle} <span class="text-light">から</span> ${state.targetArticle}`;
-
-        let pathHtml = `
+        UI.result.modeText.innerHTML = `${state.startArticle} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${state.targetArticle}`;
+        UI.result.pathContainer.innerHTML = `
           <details class="path-details">
-            <summary class="path-summary">
-              <span>経路を見る</span>
-              <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-            </summary>
-            <div class="path-content">
-              <ol class="path-list">
-                ${state.path.map((p) => `<li>${p}</li>`).join("")}
-              </ol>
-            </div>
-          </details>
-        `;
-        document.getElementById("result-path-container").innerHTML = pathHtml;
-
-        showScreen("result");
+            <summary class="path-summary"><span>経路を見る</span><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></summary>
+            <div class="path-content"><ol class="path-list">${state.path.map(p => `<li>${p}</li>`).join('')}</ol></div>
+          </details>`;
+        showScreen('result');
       }
 
-      // Event Listeners for Start Screen Buttons
-      const btnToggleDaily = document.getElementById("btn-toggle-daily");
-      const dailyButtonsContainer = document.getElementById(
-        "daily-buttons-container",
-      );
+      UI.start.btnToggleDaily.onclick = () => {
+        const c = UI.start.dailyButtonsContainer;
+        if(c.style.display === 'none') { c.style.display = 'flex'; } else { c.style.display = 'none'; }
+      };
+      document.getElementById('btn-random').onclick = () => { UI.modal.startInput.value = ''; UI.modal.targetInput.value = ''; UI.modal.overlay.classList.add('active'); };
+      UI.modal.btnCancel.onclick = () => UI.modal.overlay.classList.remove('active');
+      UI.modal.btnStart.onclick = async () => {
+        UI.modal.overlay.classList.remove('active'); showLoading(true);
+        try {
+          let s = UI.modal.startInput.value.trim(), t = UI.modal.targetInput.value.trim();
+          if(!s && !t) { const r = await fetchRand(2); s=r[0]; t=r[1]; }
+          else if(!s) { const r = await fetchRand(1); s=r[0]; }
+          else if(!t) { const r = await fetchRand(1); t=r[0]; }
+          startGame('random', s, t);
+        } catch(e) { showToast('取得失敗'); } finally { showLoading(false); }
+      };
+      document.getElementById('btn-retire').onclick = () => { if(confirm('トップに戻りますか？')) { if(state.timerInterval) clearInterval(state.timerInterval); showScreen('start'); }};
+      document.getElementById('btn-result-home').onclick = () => showScreen('start');
+      document.getElementById('btn-share').onclick = () => { const t = genText(state); window.open(`https://taittsuu.com/share?text=${encodeURIComponent(t)}`, '_blank'); };
+      document.getElementById('btn-copy').onclick = () => copyToClipboard(genText(state));
 
-      btnToggleDaily.addEventListener("click", () => {
-        if (dailyButtonsContainer.style.display === "none") {
-          dailyButtonsContainer.style.display = "flex";
-          btnToggleDaily.style.backgroundColor =
-            "var(--md-sys-color-secondary-container)";
-          btnToggleDaily.style.color =
-            "var(--md-sys-color-on-secondary-container)";
-        } else {
-          dailyButtonsContainer.style.display = "none";
-          btnToggleDaily.style.backgroundColor = "var(--md-sys-color-primary)";
-          btnToggleDaily.style.color = "var(--md-sys-color-on-primary)";
-        }
-      });
-
-      document.getElementById("btn-daily-1").addEventListener("click", () => {
-        if (!state.dailyData) return;
-        startGame("daily1", CONST_TIGHTS, state.dailyData.article);
-      });
-
-      document.getElementById("btn-daily-2").addEventListener("click", () => {
-        if (!state.dailyData) return;
-        startGame("daily2", state.dailyData.article, CONST_TIGHTS);
-      });
-
-      document
-        .getElementById("btn-random")
-        .addEventListener("click", async () => {
-          showLoading(true);
-          try {
-            const randomArticles = await fetchWikiRandom();
-            startGame("random", randomArticles[0], randomArticles[1]);
-          } catch (e) {
-            alert("ランダム記事の取得に失敗しました");
-          } finally {
-            showLoading(false);
-          }
-        });
-
-      // Retire & Home Buttons
-      document.getElementById("btn-retire").addEventListener("click", () => {
-        if (confirm("トップ画面に戻りますか？現在の進行状況は失われます。")) {
-          showScreen("start");
-        }
-      });
-      document
-        .getElementById("btn-result-home")
-        .addEventListener("click", () => {
-          showScreen("start");
-        });
-
-      // Share Buttons
-      document.getElementById("btn-share").addEventListener("click", () => {
-        const text = generateShareText(state);
-        const url = `https://taittsuu.com/share?text=${encodeURIComponent(text)}`;
-        window.open(url, "_blank");
-      });
-
-      document.getElementById("btn-copy").addEventListener("click", () => {
-        const text = generateShareText(state);
-        copyToClipboard(text);
-      });
-
-      // Init
-      window.addEventListener("DOMContentLoaded", () => {
-        loadDailyJson();
-        renderLocalHistory();
-      });
+      window.addEventListener('DOMContentLoaded', () => { loadDailyJson(); loadLocalHistory(); });
     </script>
   </body>
 </html>
