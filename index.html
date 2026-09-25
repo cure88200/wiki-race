@@ -772,6 +772,19 @@
       const API_BASE = "https://ja.wikipedia.org/w/api.php";
       const CONST_TIGHTS = "タイツ";
       const APP_URL_BASE = "https://cure88200.github.io/wiki-race/";
+      const SENSITIVE_KEYWORDS = [
+        "性的",
+        "成人向け",
+        "アダルト",
+        "ポルノ",
+        "性風俗",
+        "エロ",
+        "18禁",
+        "性科学",
+        "性行為",
+        "性器",
+        "濡れ場",
+      ];
 
       let state = {
         mode: "",
@@ -1106,12 +1119,51 @@
           );
       }
 
+      async function isSafeArticle(title) {
+        try {
+          const res = await fetch(
+            `${API_BASE}?action=query&titles=${encodeURIComponent(title)}&prop=categories|templates&cllimit=50&tllimit=50&format=json&origin=*`,
+          );
+          const data = await res.json();
+          const pages = data.query?.pages || {};
+          for (const pid in pages) {
+            const page = pages[pid];
+            const categories = (page.categories || []).map((c) => c.title);
+            const templates = (page.templates || []).map((t) => t.title);
+            const allMeta = [...categories, ...templates].join(" ");
+            for (const kw of SENSITIVE_KEYWORDS) {
+              if (allMeta.includes(kw) || title.includes(kw)) {
+                return false;
+              }
+            }
+          }
+          return true;
+        } catch (e) {
+          return true;
+        }
+      }
+
+      async function getSafeRandomArticle() {
+        while (true) {
+          const res = await fetch(
+            `${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=3&format=json&origin=*`,
+          );
+          const data = await res.json();
+          const titles = (data.query?.random || []).map((r) => r.title);
+          for (const title of titles) {
+            if (await isSafeArticle(title)) {
+              return title;
+            }
+          }
+        }
+      }
+
       async function fetchRand(num) {
-        const res = await fetch(
-          `${API_BASE}?action=query&list=random&rnnamespace=0&rnlimit=${num}&format=json&origin=*`,
-        );
-        const data = await res.json();
-        return data.query.random.map((r) => r.title);
+        const results = [];
+        for (let i = 0; i < num; i++) {
+          results.push(await getSafeRandomArticle());
+        }
+        return results;
       }
 
       async function startGame(mode, start, target) {

@@ -1,63 +1,88 @@
 const fs = require("fs");
 const path = require("path");
 
-async function updateDaily() {
-  try {
-    // Fetch 1 random article from Wikipedia
-    const url =
-      "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json";
+const SENSITIVE_KEYWORDS = [
+  "性的",
+  "成人向け",
+  "アダルト",
+  "ポルノ",
+  "性風俗",
+  "エロ",
+  "18禁",
+  "性科学",
+  "性行為",
+  "性器",
+  "濡れ場",
+];
 
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent":
-          "WikiHopDailyBot/1.0 (https://github.com/cure88200/wiki-race)",
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+async function isSafeArticle(title) {
+  const url = `https://ja.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=categories|templates&cllimit=50&tllimit=50&format=json`;
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "WikiRaceApp/1.0 (https://cure88200.github.io/wiki-race/)",
+    },
+  });
+  const data = await res.json();
+  const pages = data.query?.pages || {};
+  for (const pid in pages) {
+    const page = pages[pid];
+    const categories = (page.categories || []).map((c) => c.title);
+    const templates = (page.templates || []).map((t) => t.title);
+    const allMeta = [...categories, ...templates].join(" ");
+    for (const kw of SENSITIVE_KEYWORDS) {
+      if (allMeta.includes(kw) || title.includes(kw)) {
+        return false;
+      }
     }
-
-    const data = await res.json();
-    const article = data.query.random[0].title;
-
-    const filePath = path.join(__dirname, "../daily_history.json");
-    let history = [];
-    if (fs.existsSync(filePath)) {
-      history = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    }
-
-    const today = new Date();
-    // Format to YYYY-MM-DD in JST
-    const jstFormatter = new Intl.DateTimeFormat("ja-JP", {
-      timeZone: "Asia/Tokyo",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const [{ value: year }, , { value: month }, , { value: day }] =
-      jstFormatter.formatToParts(today);
-    const dateStr = `${year}-${month}-${day}`;
-
-    // Prevent duplicate entry for the same day
-    if (!history.find((h) => h.date === dateStr)) {
-      history.unshift({
-        date: dateStr,
-        article: article,
-      });
-
-      // Keep history length reasonable (e.g. max 100 days)
-      if (history.length > 100) history = history.slice(0, 100);
-
-      fs.writeFileSync(filePath, JSON.stringify(history, null, 2));
-      console.log(`Successfully updated JSON for ${dateStr}: ${article}`);
-    } else {
-      console.log(`Already updated for today (${dateStr}). Skipping.`);
-    }
-  } catch (error) {
-    console.error("Error updating daily history:", error);
-    process.exit(1);
   }
+  return true;
+}
+
+async function getSafeRandomArticle() {
+  while (true) {
+    const res = await fetch(
+      "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=3&format=json",
+      {
+        headers: {
+          "User-Agent":
+            "WikiRaceApp/1.0 (https://cure88200.github.io/wiki-race/)",
+        },
+      },
+    );
+    const data = await res.json();
+    const titles = (data.query?.random || []).map((r) => r.title);
+    for (const title of titles) {
+      if (await isSafeArticle(title)) {
+        return title;
+      }
+    }
+  }
+}
+
+async function updateDaily() {
+  const historyPath = path.join(__dirname, "..", "daily_history.json");
+  let history = [];
+  if (fs.existsSync(historyPath)) {
+    history = JSON.parse(fs.readFileSync(historyPath, "utf8"));
+  }
+
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const yyyy = now.getUTCFullYear();
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(now.getUTCDate()).padStart(2, "0");
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  if (history.length > 0 && history[0].date === todayStr) {
+    return;
+  }
+
+  const title = await getSafeRandomArticle();
+  history.unshift({
+    date: todayStr,
+    article: title,
+  });
+
+  fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), "utf8");
 }
 
 updateDaily();
