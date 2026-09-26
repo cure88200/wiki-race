@@ -1213,7 +1213,9 @@
 
       async function loadDailyJson() {
         try {
-          const res = await fetch("./daily_history.json");
+          const res = await fetch(`./daily_history.json?t=${Date.now()}`, {
+            cache: "no-store",
+          });
           if (!res.ok) throw new Error();
           const d = await res.json();
           if (d && d.length > 0) {
