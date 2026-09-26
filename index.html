@@ -119,10 +119,23 @@
         font-size: 14px;
         font-weight: 500;
       }
+      .card-chevron {
+        width: 18px;
+        height: 18px;
+        fill: var(--md-sys-color-on-surface-variant);
+        transition: transform 0.25s ease;
+        flex-shrink: 0;
+      }
+      .list-item.open .card-chevron {
+        transform: rotate(180deg);
+      }
       .btn {
-        height: 48px;
-        padding: 0 20px;
-        border-radius: var(--md-shape-corner-full);
+        min-height: 48px;
+        height: auto;
+        padding: 10px 20px;
+        line-height: 1.4;
+        word-break: break-word;
+        border-radius: var(--md-shape-corner-medium);
         font-size: 15px;
         font-weight: 700;
         letter-spacing: 0.1px;
@@ -134,6 +147,7 @@
         user-select: none;
         gap: 8px;
         width: 100%;
+        text-align: center;
       }
       .btn:active {
         transform: scale(0.98);
@@ -938,20 +952,45 @@
         const g = pastDailyGroups[pastDailyIdx];
         UI.past.label.textContent = `${formatMD(g.start)} 〜 ${formatMD(g.end)}`;
         UI.past.list.innerHTML = "";
-        g.items.forEach((item) => {
+        g.items.forEach((item, i) => {
+          const isFirst = i === 0;
           const div = document.createElement("div");
-          div.className = "list-item";
+          div.className = `list-item ${isFirst ? "open" : ""}`;
+          div.style.cursor = "pointer";
           div.innerHTML = `
-            <div class="list-item-header"><span>${item.date}</span></div>
-            <div class="list-item-title">${item.article}</div>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-secondary" style="height:36px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${CONST_TIGHTS}', '${item.article}')">
-                タイツ <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${item.article}
+            <div class="list-item-header" style="pointer-events: none; display: flex; justify-content: space-between; align-items: center;">
+              <span>${item.date}</span>
+              <svg class="card-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+            </div>
+            <div class="list-item-title" style="pointer-events: none; word-break: break-all;">${item.article}</div>
+            <div id="past-expand-${i}" class="expand-container" style="display: ${isFirst ? "flex" : "none"}; margin-top: 8px; padding: 12px; gap: 8px;">
+              <button class="btn btn-secondary" style="min-height: 40px; font-size: 13px; padding: 8px 12px;" onclick="event.stopPropagation(); startGame('past', '${CONST_TIGHTS}', '${item.article}')">
+                タイツ <span class="from-text-light">から</span> ${item.article}
               </button>
-              <button class="btn btn-secondary" style="height:36px; font-size:12px; padding: 0 8px;" onclick="startGame('past', '${item.article}', '${CONST_TIGHTS}')">
-                ${item.article} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> タイツ
+              <button class="btn btn-secondary" style="min-height: 40px; font-size: 13px; padding: 8px 12px;" onclick="event.stopPropagation(); startGame('past', '${item.article}', '${CONST_TIGHTS}')">
+                ${item.article} <span class="from-text-light">から</span> タイツ
               </button>
             </div>`;
+          div.onclick = () => {
+            const container = document.getElementById(`past-expand-${i}`);
+            const isClosed = container.style.display === "none";
+            document
+              .querySelectorAll("#past-daily-list .expand-container")
+              .forEach((el) => (el.style.display = "none"));
+            document
+              .querySelectorAll("#past-daily-list .list-item")
+              .forEach((el) => el.classList.remove("open"));
+            if (isClosed) {
+              container.style.display = "flex";
+              div.classList.add("open");
+              setTimeout(() => {
+                container.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest",
+                });
+              }, 60);
+            }
+          };
           UI.past.list.appendChild(div);
         });
       }
@@ -970,46 +1009,89 @@
         const g = historyGroups[historyIdx];
         UI.hist.label.textContent = `${formatMD(g.start)} 〜 ${formatMD(g.end)}`;
         UI.hist.list.innerHTML = "";
-        g.items.forEach((item) => {
+        g.items.forEach((item, i) => {
+          const isFirst = i === 0;
           const div = document.createElement("div");
-          div.className = "list-item";
+          div.className = `list-item ${isFirst ? "open" : ""}`;
+          div.style.cursor = "pointer";
           const pArr = item.path || [];
           let pHtml =
             pArr.length > 0
               ? `
-            <details class="path-details">
+            <details class="path-details" onclick="event.stopPropagation();">
               <summary class="path-summary"><span>経路を見る</span><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></summary>
               <div class="path-content"><ol class="path-list">${pArr.map((p) => `<li>${p}</li>`).join("")}</ol></div>
             </details>`
               : "";
+
+          const startName = item.start || item.startArticle;
+          const targetName = item.target || item.targetArticle;
+          const itemMode = item.mode || "random";
+
           div.innerHTML = `
-            <div class="list-item-header"><span>${item.date}</span><span style="color:var(--md-sys-color-primary); font-weight:700;">${item.clicks}手 (${item.time || 0}秒)</span></div>
-            <div class="list-item-title">${item.start} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${item.target}</div>
-            ${pHtml}
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-secondary btn-share-hist" data-idx="${item._oIdx}" style="flex: 2; height: 32px; font-size: 12px; padding: 0 12px;">
-                <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>タイッツー
-              </button>
-              <button class="btn btn-secondary btn-copy-hist" data-idx="${item._oIdx}" style="flex: 1; height: 32px; font-size: 12px; padding: 0 12px;">
-                <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>コピー
-              </button>
+            <div class="list-item-header" style="pointer-events: none; display: flex; justify-content: space-between; align-items: center;">
+              <span>${item.date}</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="color:var(--md-sys-color-primary); font-weight:700;">${item.clicks}手 (${item.time || 0}秒)</span>
+                <svg class="card-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </div>
+            </div>
+            <div class="list-item-title" style="pointer-events: none; word-break: break-all; margin-top: 2px;">
+              ${startName} <span class="from-text-light" style="color:var(--md-sys-color-on-surface-variant)">から</span> ${targetName}
+            </div>
+            <div id="hist-expand-${i}" class="expand-container" style="display: ${isFirst ? "flex" : "none"}; margin-top: 8px; padding: 12px; gap: 8px;">
+              ${pHtml}
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button class="btn btn-secondary btn-retry-hist" style="flex: 1.2; height: 36px; min-height: 36px; font-size: 12px; padding: 0 8px;">
+                  <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>リトライ
+                </button>
+                <button class="btn btn-secondary btn-share-hist" style="flex: 1.5; height: 36px; min-height: 36px; font-size: 12px; padding: 0 8px;">
+                  <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>タイッツー
+                </button>
+                <button class="btn btn-secondary btn-copy-hist" style="flex: 1; height: 36px; min-height: 36px; font-size: 12px; padding: 0 12px;">
+                  <svg style="width:14px; height:14px; fill:currentColor; margin-right:4px;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>コピー
+                </button>
+              </div>
             </div>`;
+
+          div.onclick = () => {
+            const container = document.getElementById(`hist-expand-${i}`);
+            const isClosed = container.style.display === "none";
+            document
+              .querySelectorAll("#local-history-list .expand-container")
+              .forEach((el) => (el.style.display = "none"));
+            document
+              .querySelectorAll("#local-history-list .list-item")
+              .forEach((el) => el.classList.remove("open"));
+            if (isClosed) {
+              container.style.display = "flex";
+              div.classList.add("open");
+              setTimeout(() => {
+                container.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest",
+                });
+              }, 60);
+            }
+          };
+
+          div.querySelector(".btn-retry-hist").onclick = (e) => {
+            e.stopPropagation();
+            startGame(itemMode, startName, targetName);
+          };
+
+          div.querySelector(".btn-share-hist").onclick = (e) => {
+            e.stopPropagation();
+            shareHist(item._oIdx, false);
+          };
+
+          div.querySelector(".btn-copy-hist").onclick = (e) => {
+            e.stopPropagation();
+            shareHist(item._oIdx, true);
+          };
+
           UI.hist.list.appendChild(div);
         });
-        document
-          .querySelectorAll(".btn-share-hist")
-          .forEach((b) =>
-            b.addEventListener("click", (e) =>
-              shareHist(e.currentTarget.dataset.idx, false),
-            ),
-          );
-        document
-          .querySelectorAll(".btn-copy-hist")
-          .forEach((b) =>
-            b.addEventListener("click", (e) =>
-              shareHist(e.currentTarget.dataset.idx, true),
-            ),
-          );
       }
 
       UI.past.prev.addEventListener("click", () => {
