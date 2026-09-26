@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>wiki-race</title>
+    <title>tights-wiki-race</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -537,7 +537,7 @@
       <div id="screen-start" class="screen screen-narrow active">
         <div style="text-align: center; margin-bottom: 8px">
           <h1 style="margin: 0; font-size: 32px; letter-spacing: -0.5px">
-            wiki-race
+            tights-wiki-race
           </h1>
           <span id="btn-how-to" class="how-to-link">遊び方</span>
         </div>
@@ -877,7 +877,7 @@
     <script>
       const API_BASE = "https://ja.wikipedia.org/w/api.php";
       const CONST_TIGHTS = "タイツ";
-      const APP_URL_BASE = "https://cure88200.github.io/wiki-race/";
+      const APP_URL_BASE = "https://cure88200.github.io/tights-wiki-race/";
       const SENSITIVE_KEYWORDS = [
         "性的",
         "成人向け",
@@ -1294,7 +1294,7 @@
               ? item.clearTime
               : 0;
         const challengeUrl = `${APP_URL_BASE}?start=${encodeURIComponent(start)}&target=${encodeURIComponent(target)}`;
-        return `${m}を"${start}"から"${target}"でクリア！\nクリック回数：${item.clicks}回\nクリアタイム：${time}秒\n#wiki-race\n${challengeUrl}`;
+        return `${m}を"${start}"から"${target}"でクリア！\nクリック回数：${item.clicks}回\nクリアタイム：${time}秒\n#tights-wiki-race\n${challengeUrl}`;
       }
       function shareHist(idx, isCopy) {
         const i = historyData[idx];
