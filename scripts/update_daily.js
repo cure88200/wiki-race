@@ -16,26 +16,31 @@ const SENSITIVE_KEYWORDS = [
 ];
 
 async function isSafeArticle(title) {
-  const url = `https://ja.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=categories|templates&cllimit=50&tllimit=50&format=json`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "WikiRaceApp/1.0 (https://cure88200.github.io/wiki-race/)",
-    },
-  });
-  const data = await res.json();
-  const pages = data.query?.pages || {};
-  for (const pid in pages) {
-    const page = pages[pid];
-    const categories = (page.categories || []).map((c) => c.title);
-    const templates = (page.templates || []).map((t) => t.title);
-    const allMeta = [...categories, ...templates].join(" ");
-    for (const kw of SENSITIVE_KEYWORDS) {
-      if (allMeta.includes(kw) || title.includes(kw)) {
-        return false;
+  try {
+    const url = `https://ja.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=categories|templates&cllimit=50&tllimit=50&format=json`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "WikiRaceApp/1.0 (https://cure88200.github.io/wiki-race/)",
+      },
+    });
+    const data = await res.json();
+    const pages = data.query?.pages || {};
+    for (const pid in pages) {
+      const page = pages[pid];
+      const categories = (page.categories || []).map((c) => c.title);
+      const templates = (page.templates || []).map((t) => t.title);
+      const allMeta = [...categories, ...templates].join(" ");
+      for (const kw of SENSITIVE_KEYWORDS) {
+        if (allMeta.includes(kw) || title.includes(kw)) {
+          return false;
+        }
       }
     }
+    return true;
+  } catch (e) {
+    return true;
   }
-  return true;
 }
 
 async function getSafeRandomArticle() {
@@ -59,6 +64,16 @@ async function getSafeRandomArticle() {
   }
 }
 
+function getJstDateString(offsetDays = 0) {
+  const date = new Date(
+    Date.now() + 9 * 60 * 60 * 1000 + offsetDays * 24 * 60 * 60 * 1000,
+  );
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 async function updateDaily() {
   const historyPath = path.join(__dirname, "..", "daily_history.json");
   let history = [];
@@ -66,23 +81,27 @@ async function updateDaily() {
     history = JSON.parse(fs.readFileSync(historyPath, "utf8"));
   }
 
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const yyyy = now.getUTCFullYear();
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(now.getUTCDate()).padStart(2, "0");
-  const todayStr = `${yyyy}-${mm}-${dd}`;
+  const todayStr = getJstDateString(0);
+  const tomorrowStr = getJstDateString(1);
 
-  if (history.length > 0 && history[0].date === todayStr) {
-    return;
+  let updated = false;
+
+  if (!history.some((h) => h.date === todayStr)) {
+    const title = await getSafeRandomArticle();
+    history.push({ date: todayStr, article: title });
+    updated = true;
   }
 
-  const title = await getSafeRandomArticle();
-  history.unshift({
-    date: todayStr,
-    article: title,
-  });
+  if (!history.some((h) => h.date === tomorrowStr)) {
+    const title = await getSafeRandomArticle();
+    history.push({ date: tomorrowStr, article: title });
+    updated = true;
+  }
 
-  fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), "utf8");
+  if (updated) {
+    history.sort((a, b) => b.date.localeCompare(a.date));
+    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), "utf8");
+  }
 }
 
 updateDaily();

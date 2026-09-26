@@ -1043,18 +1043,33 @@
           if (!res.ok) throw new Error();
           const d = await res.json();
           if (d && d.length > 0) {
-            const todayD = new Date();
-            UI.start.dailyDateLabel.textContent = `${todayD.getMonth() + 1}月${todayD.getDate()}日のデイリー記事`;
-            UI.start.todayDailyArticle.textContent = d[0].article;
-            UI.start.btnDaily1.innerHTML = `タイツ <span class="from-text-light">から</span> ${d[0].article}`;
-            UI.start.btnDaily2.innerHTML = `${d[0].article} <span class="from-text-light">から</span> タイツ`;
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            let todayEntry = d.find((item) => item.date === todayStr);
+            if (!todayEntry) {
+              todayEntry = d.find((item) => item.date <= todayStr) || d[0];
+            }
+
+            const parts = todayEntry.date.split("-");
+            const mNum = parseInt(parts[1], 10);
+            const dNum = parseInt(parts[2], 10);
+
+            UI.start.dailyDateLabel.textContent = `${mNum}月${dNum}日のデイリー記事`;
+            UI.start.todayDailyArticle.textContent = todayEntry.article;
+            UI.start.btnDaily1.innerHTML = `タイツ <span class="from-text-light">から</span> ${todayEntry.article}`;
+            UI.start.btnDaily2.innerHTML = `${todayEntry.article} <span class="from-text-light">から</span> タイツ`;
 
             UI.start.btnDaily1.onclick = () =>
-              startGame("daily1", CONST_TIGHTS, d[0].article);
+              startGame("daily1", CONST_TIGHTS, todayEntry.article);
             UI.start.btnDaily2.onclick = () =>
-              startGame("daily2", d[0].article, CONST_TIGHTS);
+              startGame("daily2", todayEntry.article, CONST_TIGHTS);
 
-            pastDailyGroups = groupDataByWeek(d.slice(1));
+            const pastList = d.filter((item) => item.date < todayEntry.date);
+            pastDailyGroups = groupDataByWeek(pastList);
             pastDailyIdx = 0;
             renderPastDaily();
           }
