@@ -477,6 +477,44 @@
         color: var(--md-sys-color-on-surface);
         text-decoration: underline;
       }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background-color: var(--md-sys-color-surface);
+        padding: 24px;
+        border-radius: var(--md-shape-corner-medium);
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .how-to-link {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface-variant);
+        text-decoration: underline;
+        cursor: pointer;
+        display: inline-block;
+      }
+      .how-to-link:hover {
+        color: var(--md-sys-color-primary);
+      }
     </style>
   </head>
   <body>
@@ -497,6 +535,13 @@
       <div id="toast" class="toast"></div>
 
       <div id="screen-start" class="screen screen-narrow active">
+        <div style="text-align: center; margin-bottom: 8px">
+          <h1 style="margin: 0; font-size: 32px; letter-spacing: -0.5px">
+            wiki-race
+          </h1>
+          <span id="btn-how-to" class="how-to-link">遊び方</span>
+        </div>
+
         <div style="text-align: center; margin-bottom: 8px">
           <div
             id="daily-date-label"
@@ -765,6 +810,52 @@
         </div>
         <button class="btn btn-secondary" id="btn-result-home">
           トップに戻る
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-howto" class="modal-overlay">
+      <div class="modal-content">
+        <h2 style="margin: 0; text-align: left">遊び方</h2>
+        <div
+          style="
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          "
+        >
+          <p style="margin: 0">
+            Wikipediaの記事内のリンクだけをタップして、指定されたゴール記事を目指すゲームです。
+          </p>
+          <ul
+            style="
+              padding-left: 20px;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            "
+          >
+            <li>記事中の青いリンクをクリックして次の記事へ移動します。</li>
+            <li>できるだけ少ない手数＆短いタイムを目指しましょう</li>
+            <li>
+              <strong>デイリーチャレンジ</strong>：毎日変わる今日のお題です。
+            </li>
+            <li>
+              <strong>フリーチャレンジ</strong
+              >：自由なお題や完全ランダムなお題で遊べます。
+            </li>
+          </ul>
+        </div>
+        <button
+          class="btn btn-primary"
+          id="btn-close-howto"
+          style="height: 44px; min-height: 44px"
+        >
+          とじる
         </button>
       </div>
     </div>
@@ -1423,6 +1514,15 @@
           showToast("共有された問題がセットされました！");
         }
       }
+
+      const modalHowto = document.getElementById("modal-howto");
+      document.getElementById("btn-how-to").onclick = () =>
+        modalHowto.classList.add("active");
+      document.getElementById("btn-close-howto").onclick = () =>
+        modalHowto.classList.remove("active");
+      modalHowto.onclick = (e) => {
+        if (e.target === modalHowto) modalHowto.classList.remove("active");
+      };
 
       window.addEventListener("DOMContentLoaded", () => {
         loadDailyJson();
